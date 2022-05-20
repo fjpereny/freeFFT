@@ -43,6 +43,7 @@ class Window(QMainWindow):
         self.ui.actionOpen.triggered.connect(self.open_file)
         self.ui.actionQuit.triggered.connect(self.close)
         self.ui.actionClose.triggered.connect(self.clear_chart)
+        self.ui.actionPlot_Toolbar.triggered.connect(self.toggle_toolbar_visible)
 
         # set the layout
         layout = QVBoxLayout()
@@ -85,16 +86,25 @@ class Window(QMainWindow):
         self.canvas.draw()
 
     def open_file(self):
-        file_path = QFileDialog.getOpenFileName(self, "Open File", "/home", "CSV files (*.csv)")
-        if file_path:
-            self.plot(file_path[0])
-            self.toolbar.show()
+        file_path = QFileDialog.getOpenFileName(self, "Open File", __file__, "CSV files (*.csv)")
+        if file_path[0] == '':
+            return
+        self.plot(file_path[0])
+        self.toolbar.show()
+        self.ui.actionPlot_Toolbar.setChecked(True)
 
     def clear_chart(self):
         self.figure.clear()
         self.toolbar.hide()
+        self.ui.actionPlot_Toolbar.setChecked(False)
         self.canvas.draw()
         self.data = None
+
+    def toggle_toolbar_visible(self):
+        if self.ui.actionPlot_Toolbar.isChecked():
+            self.toolbar.show()
+        else:
+            self.toolbar.hide()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
