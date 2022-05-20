@@ -1,6 +1,7 @@
 import sys
 
 from PyQt5.QtWidgets import QApplication, QPushButton, QVBoxLayout, QMainWindow, QWidget, QLineEdit
+from PyQt5.QtWidgets import QFileDialog
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
@@ -10,6 +11,8 @@ import numpy as np
 from numpy import array
 
 import fast_fourier_transform
+from ui_main import Ui_MainWindow
+import settings
 
 class DataPoint(object):
     def __init__(self, x, y) -> None:
@@ -18,10 +21,11 @@ class DataPoint(object):
 
 class Window(QMainWindow):
     def __init__(self, parent=None):
-        super(Window, self).__init__(parent)
-
-        self.widget = QWidget(self)
-        self.setCentralWidget(self.widget)
+        super(Window, self).__init__()
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+        # self.widget = QWidget(self)
+        # self.setCentralWidget(self.widget)
 
         # a figure instance to plot on
         self.figure = plt.figure()
@@ -33,25 +37,25 @@ class Window(QMainWindow):
         # this is the Navigation widget
         # it takes the Canvas widget and a parent
         self.toolbar = NavigationToolbar(self.canvas, self)
+        self.toolbar.hide()
 
-        self.editFilePath = QLineEdit(self, text=r"/home/frank/Git/fft-analysis/vibration-data-examples-CSV/piezo_100Hz.csv")
-
-        # Just some button connected to `plot` method
-        self.button = QPushButton('Plot')
-        self.button.clicked.connect(self.plot)
+        # Just connections
+        self.ui.actionOpen.triggered.connect(self.open_file)
+        self.ui.actionQuit.triggered.connect(self.close)
+        self.ui.actionClose.triggered.connect(self.clear_chart)
 
         # set the layout
         layout = QVBoxLayout()
         layout.addWidget(self.toolbar)
         layout.addWidget(self.canvas)
-        layout.addWidget(self.editFilePath)
-        layout.addWidget(self.button)
-        self.widget.setLayout(layout)
+        self.ui.widget.setLayout(layout)
 
-    def plot(self):
-        file_path = self.editFilePath.text()
-        data = fast_fourier_transform.read_csv(file_path, 1, 2)
-        data_slice = data[:]
+    def plot(self, file_path=None):
+        min_time = settings.RAW_MIN_TIME
+        max_time = settings.RAW_MAX_TIME
+
+        self.data = fast_fourier_transform.read_csv(file_path, min_time, max_time)
+        data_slice = self.data[:]
 
         # Calculate FFT
         freq, amplitude, sample_rate = fast_fourier_transform.make_fft(data_slice[:, 0], data_slice[:, 1])
@@ -79,6 +83,18 @@ class Window(QMainWindow):
 
         # refresh canvas
         self.canvas.draw()
+
+    def open_file(self):
+        file_path = QFileDialog.getOpenFileName(self, "Open File", "/home", "CSV files (*.csv)")
+        if file_path:
+            self.plot(file_path[0])
+            self.toolbar.show()
+
+    def clear_chart(self):
+        self.figure.clear()
+        self.toolbar.hide()
+        self.canvas.draw()
+        self.data = None
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
