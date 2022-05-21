@@ -1,26 +1,9 @@
-import csv
 from random import sample
 import numpy as np
 from numpy.fft import fft
 
 
-def read_csv(file_path, min_time=None, max_time=None):
-    points = []
-    with open(file_path) as file:
-        reader = csv.reader(file)
-        for row in reader:
-            time = float(row[0])
-            if min_time != None and time < min_time:
-                continue
-            elif max_time != None and time > max_time:
-                return np.array(points)
-            else:
-                amplitude = float(row[1])
-                points.append([time, amplitude])
-    return np.array(points)
-
-
-def make_fft(time_vals, amplitude_vals, n=None):
+def make_fft(time_vals, amplitude_vals, sampling_rate, n=None):
     if len(amplitude_vals) != len(time_vals):
         print("Error: Amplitude and time valudes must have the same length.")
         return None
@@ -31,10 +14,8 @@ def make_fft(time_vals, amplitude_vals, n=None):
     
     X = fft(amplitude_vals, n=n)
     N = len(X)
-
-    time_elapsed = max(time_vals) - min(time_vals)
-    sample_rate = N / time_elapsed
-    T = N/sample_rate
+    # sampling_rate = N / (max(time_vals) - min(time_vals))     
+    T = N / sampling_rate
 
     n = np.arange(N/2)
     freq = n/T
@@ -43,4 +24,4 @@ def make_fft(time_vals, amplitude_vals, n=None):
     X = X[:len(freq)]
     amplitudes = np.abs(X)/N*2
 
-    return [freq, amplitudes, sample_rate]
+    return [freq, amplitudes]

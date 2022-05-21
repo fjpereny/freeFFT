@@ -1,14 +1,20 @@
+import csv
 import sys
 
 from PyQt5.QtWidgets import QApplication, QPushButton, QVBoxLayout, QMainWindow, QWidget, QLineEdit
 from PyQt5.QtWidgets import QFileDialog
+from PyQt5.Qt import QMovie
+from PyQt5.QtCore import QThread, pyqtSignal, QObject
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
 
 import numpy as np
-from numpy import array
+from numpy import array, random
+
+import seaborn
+seaborn.set()
 
 import fast_fourier_transform
 from ui_main import Ui_MainWindow
@@ -49,17 +55,50 @@ class Window(QMainWindow):
         layout = QVBoxLayout()
         layout.addWidget(self.toolbar)
         layout.addWidget(self.canvas)
-        self.ui.widget.setLayout(layout)
+        self.ui.chartWidget.setLayout(layout)
+
+        # set loading move to label object
+        # movie = QMovie('loading-blocks.gif')
+        # movie.start()
+        # self.ui.labelBusyGif.setMovie(movie)
+        self.ui.busyWidget.hide()
 
     def plot(self, file_path=None):
         min_time = settings.RAW_MIN_TIME
         max_time = settings.RAW_MAX_TIME
 
-        self.data = fast_fourier_transform.read_csv(file_path, min_time, max_time)
-        data_slice = self.data[:]
+        self.ui.labelBusy.setText('<h1>Reading CSV Data... (2/5)</h1>')
+        self.repaint()
+        self.data = self.read_csv(file_path, min_time, max_time)
+        self.sample_size = len(self.data)
+        self.time_elapsed = self.data[-1, 0] - self.data[0, 0]
+        self.sampling_rate = self.sample_size / self.time_elapsed
+        self.ui.labelSampleSize.setText("Sample Size: " + str(self.sample_size))
+        
+
+        # Plotted raw data (random sample of very large data sets)
+        if self.sample_size > settings.MAX_RAW_PLOT_COUNT:
+            plot_row = np.random.randint(0, len(self.data), size=settings.MAX_RAW_PLOT_COUNT)
+            plot_row.sort()
+            self.plot_data = self.data[plot_row, :]
+        else:
+            self.plot_data = self.data
 
         # Calculate FFT
-        freq, amplitude, sample_rate = fast_fourier_transform.make_fft(data_slice[:, 0], data_slice[:, 1])
+        self.ui.labelBusy.setText('<h1>Calculating FFT Data... (3/5)</h1>')
+        self.repaint()
+        freq, amplitude = fast_fourier_transform.make_fft(self.data[:, 0], self.data[:, 1], self.sampling_rate)  
+        self.fft_data = np.empty((len(freq), 2))
+        self.fft_data[:, 0] = freq
+        self.fft_data[:, 1] = amplitude
+
+        # Reducing number of plotted points for FFT
+        mask_min_fft_val = self.fft_data[:, 1] > settings.MIN_FFT_PCT * max(self.fft_data[:,1])
+        self.plot_fft_data = self.fft_data[mask_min_fft_val]
+
+        label_sample_rate = np.round(self.sampling_rate, 2)
+        self.ui.labelSamplingRate.setText("Sampling Rate: " + str(label_sample_rate) + " Hz")
+        self.ui.labelNyquistFreq.setText("Nyquist Frequency: " + str(np.round(label_sample_rate/2, 2)) + "Hz")
 
         # instead of ax.hold(False)
         self.figure.clear()
@@ -68,10 +107,13 @@ class Window(QMainWindow):
         ax1 = self.figure.add_subplot(121)
         ax2 = self.figure.add_subplot(122)
 
-        # plot data
-        ax1.plot(data_slice[:, 0], data_slice[:, 1], color='red')
-        ax2.stem(freq, amplitude, linefmt='b', markerfmt=" ", basefmt="-b")
-        ax2.set_xlim([0, sample_rate//2])
+        # Plot data
+        self.ui.labelBusy.setText('<h1>Creating Raw Data Plot... (4/5)</h1>')
+        self.repaint()
+        ax1.plot(self.plot_data[:, 0], self.plot_data[:, 1], color='red')
+        self.ui.labelBusy.setText('<h1>Creating FFT Plot... (5/5)</h1>')
+        self.repaint()
+        ax2.bar(self.plot_fft_data[:, 0], self.plot_fft_data[:, 1], align='center', width=3, color="blue", linewidth=0)
 
         # plot text
         ax1.set_title('Raw Data')
@@ -81,17 +123,42 @@ class Window(QMainWindow):
         ax2.set_title('FFT Data')
         ax2.set_xlabel('Frequency (Hz)')
         ax2.set_ylabel('Amplitude')
+        ax2.set_xlim(left=0)
 
-        # refresh canvas
+        self.ui.busyWidget.hide()
+        self.ui.chartWidget.show()
+        self.toolbar.configure_subplots()._tight_layout()
+        self.toolbar.configure_subplots().accept()
         self.canvas.draw()
 
     def open_file(self):
         file_path = QFileDialog.getOpenFileName(self, "Open File", __file__, "CSV files (*.csv)")
         if file_path[0] == '':
             return
+        self.ui.labelBusy.setText('<h1>Opening File... (1/5)</h1>')
+        self.ui.chartWidget.hide()
+        self.ui.busyWidget.show()
+        self.repaint()
+        self.ui.labelFileName.setText('File: ' + file_path[0])
+        self.repaint()
         self.plot(file_path[0])
         self.toolbar.show()
         self.ui.actionPlot_Toolbar.setChecked(True)
+
+    def read_csv(self, file_path, min_time=None, max_time=None):
+        points = []
+        with open(file_path) as file:
+            reader = csv.reader(file)
+            for row in reader:
+                time = float(row[0])
+                if min_time != None and time < min_time:
+                    continue
+                elif max_time != None and time > max_time:
+                    return np.array(points)
+                else:
+                    amplitude = float(row[1])
+                    points.append([time, amplitude])
+        return np.array(points)
 
     def clear_chart(self):
         self.figure.clear()
@@ -99,6 +166,10 @@ class Window(QMainWindow):
         self.ui.actionPlot_Toolbar.setChecked(False)
         self.canvas.draw()
         self.data = None
+        self.ui.labelSampleSize.setText('')
+        self.ui.labelSamplingRate.setText('')
+        self.ui.labelFileName.setText('')
+        self.ui.labelNyquistFreq.setText('')
 
     def toggle_toolbar_visible(self):
         if self.ui.actionPlot_Toolbar.isChecked():
