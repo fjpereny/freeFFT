@@ -1,5 +1,6 @@
 import csv
 import sys
+import math
 
 from PyQt5.QtWidgets import QApplication, QPushButton, QVBoxLayout, QMainWindow, QWidget, QLineEdit
 from PyQt5.QtWidgets import QFileDialog
@@ -74,7 +75,14 @@ class Window(QMainWindow):
         self.time_elapsed = self.data[-1, 0] - self.data[0, 0]
         self.sampling_rate = self.sample_size / self.time_elapsed
         self.ui.labelSampleSize.setText("Sample Size: " + str(self.sample_size))
-        
+
+        self.rms_value = self.rms(self.data[:,1])
+        self.peak_value = self.rms_value * math.sqrt(2)
+        self.peak_peak_value = 2 * self.peak_value
+
+        print(self.rms_value)
+        print(self.peak_value)
+        print(self.peak_peak_value)
 
         # Plotted raw data (random sample of very large data sets)
         if self.sample_size > settings.MAX_RAW_PLOT_COUNT:
@@ -92,8 +100,11 @@ class Window(QMainWindow):
         self.fft_data[:, 0] = freq
         self.fft_data[:, 1] = amplitude
 
+        self.max_amplitude = max(amplitude)
+        self.min_amplitude = min(amplitude)
+
         # Reducing number of plotted points for FFT
-        mask_min_fft_val = self.fft_data[:, 1] > settings.MIN_FFT_PCT * max(self.fft_data[:,1])
+        mask_min_fft_val = self.fft_data[:, 1] > settings.MIN_FFT_PCT * self.max_amplitude
         self.plot_fft_data = self.fft_data[mask_min_fft_val]
 
         label_sample_rate = np.round(self.sampling_rate, 2)
@@ -124,6 +135,7 @@ class Window(QMainWindow):
         ax2.set_xlabel('Frequency (Hz)')
         ax2.set_ylabel('Amplitude')
         ax2.set_xlim(left=0)
+        ax2.set_ylim(top=self.max_amplitude*1.2)
 
         self.ui.busyWidget.hide()
         self.ui.chartWidget.show()
@@ -176,6 +188,12 @@ class Window(QMainWindow):
             self.toolbar.show()
         else:
             self.toolbar.hide()
+
+    
+    def rms(self, values):
+        ms = np.sum(values**2) / len(values)
+        print(ms)
+        return math.sqrt(ms)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
