@@ -17,11 +17,13 @@ def make_fft(time_vals, amplitude_vals, sampling_rate, n=None):
     # sampling_rate = N / (max(time_vals) - min(time_vals))     
     T = N / sampling_rate
 
-    n = np.arange(N/2)
+    unique_points = np.ceil((N+1)/2)
+    n = np.arange(unique_points)
     freq = n/T
     
     # Remove all values greater than Nyquist frequency
     X = X[:len(freq)]
-    amplitudes = np.abs(X)/N*2
+    amplitudes = np.abs(X)/len(freq)
+    amplitudes[0] /= 2 # DC component should not be multiplied by 2
 
     return [freq, amplitudes]
