@@ -74,15 +74,11 @@ class Window(QMainWindow):
         self.sample_size = len(self.data)
         self.time_elapsed = self.data[-1, 0] - self.data[0, 0]
         self.sampling_rate = self.sample_size / self.time_elapsed
-        self.ui.labelSampleSize.setText("Sample Size: " + str(self.sample_size))
+        self.ui.lineEditSampleSize.setText(str(self.sample_size))
 
         self.rms_value = self.rms(self.data[:,1])
         self.peak_value = self.rms_value * math.sqrt(2)
         self.peak_peak_value = 2 * self.peak_value
-
-        print(self.rms_value)
-        print(self.peak_value)
-        print(self.peak_peak_value)
 
         # Plotted raw data (random sample of very large data sets)
         if self.sample_size > settings.MAX_RAW_PLOT_COUNT:
@@ -108,8 +104,8 @@ class Window(QMainWindow):
         self.plot_fft_data = self.fft_data[mask_min_fft_val]
 
         label_sample_rate = np.round(self.sampling_rate, 2)
-        self.ui.labelSamplingRate.setText("Sampling Rate: " + str(label_sample_rate) + " Hz")
-        self.ui.labelNyquistFreq.setText("Nyquist Frequency: " + str(np.round(label_sample_rate/2, 2)) + "Hz")
+        self.ui.lineEditSamplingRate.setText(str(label_sample_rate) + " Hz")
+        self.ui.lineEditNyquist.setText(str(np.round(label_sample_rate/2, 2)) + "Hz")
 
         # instead of ax.hold(False)
         self.figure.clear()
@@ -151,7 +147,7 @@ class Window(QMainWindow):
         self.ui.chartWidget.hide()
         self.ui.busyWidget.show()
         self.repaint()
-        self.ui.labelFileName.setText('File: ' + file_path[0])
+        self.ui.lineEditDataFile.setText(file_path[0])
         self.repaint()
         self.plot(file_path[0])
         self.toolbar.show()
@@ -178,10 +174,10 @@ class Window(QMainWindow):
         self.ui.actionPlot_Toolbar.setChecked(False)
         self.canvas.draw()
         self.data = None
-        self.ui.labelSampleSize.setText('')
-        self.ui.labelSamplingRate.setText('')
-        self.ui.labelFileName.setText('')
-        self.ui.labelNyquistFreq.setText('')
+        self.ui.lineEditSampleSize.setText('')
+        self.ui.lineEditSamplingRate.setText('')
+        self.ui.lineEditDataFile.setText('')
+        self.ui.lineEditNyquist.setText('')
 
     def toggle_toolbar_visible(self):
         if self.ui.actionPlot_Toolbar.isChecked():
