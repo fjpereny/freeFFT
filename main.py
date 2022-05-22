@@ -55,6 +55,7 @@ class Window(QMainWindow):
         self.ui.toolButtonDataFile.clicked.connect(self.open_file)
         self.ui.actionAbout_FreeFFT.triggered.connect(self.about)
         self.ui.pushButtonReload.clicked.connect(self.reload_file)
+        self.ui.checkBoxHideLowMagData.clicked.connect(self.checkBoxHideLowMagData_clicked)
 
         # set the layout
         layout = QVBoxLayout()
@@ -149,8 +150,8 @@ class Window(QMainWindow):
                 self.plot_binned_fft_data = self.binned_fft_data
 
         label_sample_rate = np.round(self.sampling_rate, 2)
-        self.ui.lineEditSamplingRate.setText(str(label_sample_rate) + " Hz")
-        self.ui.lineEditNyquist.setText(str(np.round(label_sample_rate/2, 2)) + "Hz")
+        self.ui.lineEditSamplingRate.setText(str(label_sample_rate))
+        self.ui.lineEditNyquist.setText(str(np.round(label_sample_rate/2, 2)))
 
         # instead of ax.hold(False)
         self.figure.clear()
@@ -184,11 +185,13 @@ class Window(QMainWindow):
         ax1.set_title('Raw Data')
         ax1.set_xlabel('Time (sec)')
         ax1.set_ylabel('Amplitude')
+        ax1twin.grid()
 
         ax2.set_title('FFT Data')
         ax2.set_xlabel('Frequency (Hz)')
         ax2.set_ylabel('Amplitude')
         ax2.set_xlim(left=0)
+
 
         # for point in self.fft_data:
         #     if point[1] >= self.max_amplitude * 0.1:
@@ -325,6 +328,16 @@ class Window(QMainWindow):
                 new_amps.append(point[1])
                 new_bins.append((cur_bin_index + 1) * step_size)
         return new_bins, new_amps
+
+    def checkBoxHideLowMagData_clicked(self):
+        if self.ui.checkBoxHideLowMagData.isChecked():
+            self.ui.radioButtonChartContinuous.setChecked(False)
+            self.ui.radioButtonHistogram.setChecked(True)
+            self.ui.radioButtonChartContinuous.setEnabled(False)
+            self.ui.radioButtonHistogram.setEnabled(False)
+        else:
+            self.ui.radioButtonChartContinuous.setEnabled(True)
+            self.ui.radioButtonHistogram.setEnabled(True)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
