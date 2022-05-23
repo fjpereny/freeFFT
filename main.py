@@ -164,14 +164,14 @@ class Window(QMainWindow):
 
         if self.ui.checkBoxPlotFreqRes.isChecked():
             if self.ui.radioButtonChartContinuous.isChecked():
-                ax2.plot(self.plot_binned_fft_data[:,0], self.plot_binned_fft_data[:,1], color="blue", linewidth=1)
+                ax2.plot(self.plot_qbinned_fft_data[:,0], self.plot_binned_fft_data[:,1], color="blue", linewidth=1)
             else:
                 ax2.bar(self.plot_binned_fft_data[:,0], self.plot_binned_fft_data[:,1], color="blue", linewidth=0, width=3, align='center')
         else:
             if self.ui.radioButtonChartContinuous.isChecked():
                 ax2.plot(self.plot_fft_data[:,0], self.plot_fft_data[:,1], color="blue", linewidth=1)
             else:
-                ax2.bar(self.plot_fft_data[:,0], self.plot_fft_data[:,1], color="blue", linewidth=0, width=3, align='center')
+                ax2.bar(self.plot_fft_data[:,0], self.plot_fft_data[:,1], color="blue", linewidth=0, width=0.5, align='center')
 
         # plot text
         ax1.set_title('Raw Data')

@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>FreeFFT - FFT Analysis Software</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/img/icon.png</normaloff>:/img/icon.png</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
@@ -514,7 +518,7 @@
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <addaction name="actionOpen"/>
     <addaction name="actionRecent_Files"/>
@@ -527,12 +531,12 @@
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
-     <string>Edit</string>
+     <string>&amp;Edit</string>
     </property>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
-     <string>View</string>
+     <string>&amp;View</string>
     </property>
     <addaction name="actionRefresh_Data"/>
     <addaction name="separator"/>
@@ -540,17 +544,17 @@
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="title">
-     <string>Settings</string>
+     <string>&amp;Settings</string>
     </property>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
-     <string>Window</string>
+     <string>&amp;Window</string>
     </property>
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
-     <string>Help</string>
+     <string>&amp;Help</string>
     </property>
     <addaction name="actionAbout_FreeFFT"/>
    </widget>
@@ -564,7 +568,7 @@
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionOpen">
    <property name="text">
-    <string>Open</string>
+    <string>&amp;Open</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -572,12 +576,12 @@
   </action>
   <action name="actionRecent_Files">
    <property name="text">
-    <string>Recent Files</string>
+    <string>&amp;Recent Files</string>
    </property>
   </action>
   <action name="actionClose">
    <property name="text">
-    <string>Close</string>
+    <string>&amp;Close</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+W</string>
@@ -590,12 +594,12 @@
   </action>
   <action name="actionExport">
    <property name="text">
-    <string>Export</string>
+    <string>&amp;Export</string>
    </property>
   </action>
   <action name="actionQuit">
    <property name="text">
-    <string>Quit</string>
+    <string>&amp;Quit</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
@@ -611,10 +615,46 @@
   </action>
   <action name="actionAbout_FreeFFT">
    <property name="text">
-    <string>About FreeFFT</string>
+    <string>&amp;About FreeFFT</string>
    </property>
   </action>
  </widget>
- <resources/>
+ <tabstops>
+  <tabstop>lineEditDataFile</tabstop>
+  <tabstop>toolButtonDataFile</tabstop>
+  <tabstop>lineEditSampleSize</tabstop>
+  <tabstop>lineEditSamplingRate</tabstop>
+  <tabstop>lineEditNyquist</tabstop>
+  <tabstop>lineEditRMS</tabstop>
+  <tabstop>lineEditPeak</tabstop>
+  <tabstop>lineEditPkPk</tabstop>
+  <tabstop>checkBoxTimeSlice</tabstop>
+  <tabstop>doubleSpinBoxStartTime</tabstop>
+  <tabstop>doubleSpinBoxEndTime</tabstop>
+  <tabstop>pushButtonReload</tabstop>
+  <tabstop>radioButtonUniform</tabstop>
+  <tabstop>radioButtonBlackman</tabstop>
+  <tabstop>radioButton_7</tabstop>
+  <tabstop>radioButtonHamming</tabstop>
+  <tabstop>radioButtonHanning</tabstop>
+  <tabstop>radioButtonKaiser</tabstop>
+  <tabstop>lineEditKaiserBeta</tabstop>
+  <tabstop>radioButton_8</tabstop>
+  <tabstop>radioButton_5</tabstop>
+  <tabstop>radioButtonChartContinuous</tabstop>
+  <tabstop>radioButtonHistogram</tabstop>
+  <tabstop>checkBoxMaxPlotFreq</tabstop>
+  <tabstop>doubleSpinBoxMaxPlotFreq</tabstop>
+  <tabstop>checkBoxPlotFreqRes</tabstop>
+  <tabstop>doubleSpinBoxPlotFreqResolution</tabstop>
+  <tabstop>checkBoxLimitPlottedPoints</tabstop>
+  <tabstop>spinBoxMaxPlottedPoints</tabstop>
+  <tabstop>checkBoxHideLowMagData</tabstop>
+  <tabstop>doubleSpinBoxHideLowMagData</tabstop>
+  <tabstop>pushButtonRecalculate</tabstop>
+ </tabstops>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>
