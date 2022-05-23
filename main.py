@@ -19,12 +19,7 @@ seaborn.set()
 
 import fast_fourier_transform
 from ui_main import Ui_MainWindow
-import settings
 
-class DataPoint(object):
-    def __init__(self, x, y) -> None:
-        self.x = x
-        self.y = y
 
 class Window(QMainWindow):
     def __init__(self, parent=None):
@@ -70,14 +65,11 @@ class Window(QMainWindow):
         self.ui.busyWidget.hide()
 
     def load_csv(self, file_path=None):
-        min_time = settings.RAW_MIN_TIME
-        max_time = settings.RAW_MAX_TIME
-
         self.ui.labelBusy.setText('<h1>Reading CSV Data... (2/5)</h1>')
         self.repaint()
         
         if file_path:
-            self.data = self.read_csv(file_path, min_time, max_time)
+            self.data = self.read_csv(file_path)
         
         if self.ui.checkBoxTimeSlice.isChecked():
             mask_time_slice_min = self.data[:,0] >= self.ui.doubleSpinBoxStartTime.value()
