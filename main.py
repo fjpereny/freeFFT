@@ -10,12 +10,10 @@ from PyQt5.QtCore import QThread, pyqtSignal, QObject
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 import numpy as np
 from numpy import array, random
-
-import seaborn
-seaborn.set()
 
 import fast_fourier_transform
 from ui_main import Ui_MainWindow
@@ -28,6 +26,7 @@ class Window(QMainWindow):
         self.ui.setupUi(self)
         
         self.data = None
+        self.increment = None
 
         # a figure instance to plot on
         self.figure = plt.figure()
@@ -52,6 +51,7 @@ class Window(QMainWindow):
         self.ui.pushButtonReload.clicked.connect(self.reload_file)
         self.ui.checkBoxHideLowMagData.clicked.connect(self.checkBoxHideLowMagData_clicked)
         self.ui.pushButtonSetWindow.clicked.connect(self.recalculate)
+        self.ui.pushButtonCreateWaterfall.clicked.connect(self.plot_waterfall)
 
         # set the layout
         layout = QVBoxLayout()
@@ -217,6 +217,8 @@ class Window(QMainWindow):
 
 
     def reload_file(self):
+        self.figure.clear() # Testing waterfall use
+        self.increment = None # Testing waterfall use
         file_path = self.ui.lineEditDataFile.text()
         if file_path == '':
             self.open_file()
@@ -332,6 +334,26 @@ class Window(QMainWindow):
         else:
             self.ui.radioButtonChartContinuous.setEnabled(True)
             self.ui.radioButtonHistogram.setEnabled(True)
+
+
+    def plot_waterfall(self):
+        if not self.increment:
+            self.figure.clear()
+            self.increment = 1
+            self.axWaterfall = self.figure.add_subplot(111, projection='3d')
+        else:
+            self.increment += 1
+
+        # create an axis
+        self.axWaterfall.plot(self.plot_fft_data[:, 0] * self.increment, np.ones(len(self.plot_fft_data)) * max(self.plot_data[:,0]) * self.increment, self.plot_fft_data[:, 1] * self.increment)
+        self.axWaterfall.set_title('FFT Waterfall Plot')
+        self.axWaterfall.set_xlabel('Frequency (Hz)')
+        self.axWaterfall.set_ylabel('Time (sec)')
+        self.axWaterfall.set_zlabel('Amplitude')
+        self.axWaterfall.grid()
+        
+        self.canvas.draw()
+        self.repaint()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
