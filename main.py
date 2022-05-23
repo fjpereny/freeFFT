@@ -51,6 +51,7 @@ class Window(QMainWindow):
         self.ui.actionAbout_FreeFFT.triggered.connect(self.about)
         self.ui.pushButtonReload.clicked.connect(self.reload_file)
         self.ui.checkBoxHideLowMagData.clicked.connect(self.checkBoxHideLowMagData_clicked)
+        self.ui.pushButtonSetWindow.clicked.connect(self.recalculate)
 
         # set the layout
         layout = QVBoxLayout()
@@ -113,6 +114,7 @@ class Window(QMainWindow):
         self.fft_data = np.empty((len(freq), 2))
         self.fft_data[:, 0] = freq
         self.fft_data[:, 1] = amplitude
+        self.fft_data[:, 1] /= self.win_mean        
 
         self.max_amplitude = max(amplitude)
         self.min_amplitude = min(amplitude)
@@ -157,7 +159,7 @@ class Window(QMainWindow):
         self.ui.labelBusy.setText('<h1>Creating Raw Data Plot... (4/5)</h1>')
         self.repaint()
         ax1.plot(self.plot_data[:, 0], self.plot_data[:, 1], color='red')
-        ax1twin.plot(self.plot_data[:,0], self.plot_win, color='green')
+        ax1twin.plot(self.plot_data[:,0], self.plot_win, color='green', linewidth=5)
         ax1.plot(self.plot_data[:,0], self.plot_windowed_data, color='blue')
         self.ui.labelBusy.setText('<h1>Creating FFT Plot... (5/5)</h1>')
         self.repaint()
@@ -171,7 +173,7 @@ class Window(QMainWindow):
             if self.ui.radioButtonChartContinuous.isChecked():
                 ax2.plot(self.plot_fft_data[:,0], self.plot_fft_data[:,1], color="blue", linewidth=1)
             else:
-                ax2.bar(self.plot_fft_data[:,0], self.plot_fft_data[:,1], color="blue", linewidth=0, width=0.5, align='center')
+                ax2.bar(self.plot_fft_data[:,0], self.plot_fft_data[:,1], color="blue", linewidth=0, width=2, align='center')
 
         # plot text
         ax1.set_title('Raw Data')
@@ -280,9 +282,9 @@ class Window(QMainWindow):
             self.win = np.kaiser(self.sample_size, float(self.ui.lineEditKaiserBeta.text()))
             self.windowed_data = self.data[:,1] * self.win        
         else:
-            self.windowed_data = self.data
             self.win = np.full(len(self.data), 1)
-            self.windowed_data = self.data[:,1] * self.win        
+            self.windowed_data = self.data[:,1]        
+        self.win_mean = sum(self.win) / self.sample_size
 
 
     def recalculate(self):
