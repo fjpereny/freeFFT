@@ -50,8 +50,8 @@ class Window(QMainWindow):
         self.ui.actionAbout_FreeFFT.triggered.connect(self.about)
         self.ui.pushButtonReload.clicked.connect(self.reload_file)
         self.ui.checkBoxHideLowMagData.clicked.connect(self.checkBoxHideLowMagData_clicked)
-        self.ui.pushButtonSetWindow.clicked.connect(self.recalculate)
         self.ui.pushButtonCreateWaterfall.clicked.connect(self.plot_waterfall)
+        self.ui.spinBoxMinPower2.valueChanged.connect(self.power_2_preview)
 
         # set the layout
         layout = QVBoxLayout()
@@ -79,14 +79,14 @@ class Window(QMainWindow):
             self.data = self.data[mask_time_slice_max]
 
         self.sample_size = len(self.data)
+
         self.time_elapsed = self.data[-1, 0] - self.data[0, 0]
         self.sampling_rate = self.sample_size / self.time_elapsed
+
         self.ui.lineEditSampleSize.setText(str(self.sample_size))
-
-        self.plot()
-
-    def plot(self, file_path=None):
-        self.window_function()        
+        label_sample_rate = np.round(self.sampling_rate, 2)
+        self.ui.lineEditSamplingRate.setText(str(label_sample_rate))
+        self.ui.lineEditNyquist.setText(str(np.round(label_sample_rate/2, 2)))
 
         self.rms_value = self.rms(self.data[:,1])
         self.peak_value = self.rms_value * math.sqrt(2)
@@ -95,29 +95,57 @@ class Window(QMainWindow):
         self.ui.lineEditPeak.setText(str(self.peak_value))
         self.ui.lineEditPkPk.setText(str(self.peak_peak_value))
 
-        # Plotted raw data (random sample of very large data sets)
-        if self.ui.checkBoxLimitPlottedPoints.isChecked() and self.sample_size > self.ui.spinBoxMaxPlottedPoints.value():
-            plot_row = np.random.randint(0, len(self.data), size=self.ui.spinBoxMaxPlottedPoints.value())
-            plot_row.sort()
-            self.plot_data = self.data[plot_row,:]
-            self.plot_win = self.win[plot_row]
-            self.plot_windowed_data = self.windowed_data[plot_row]
+        self.window_function()
+
+        self.zero_fill_data = np.zeros((len(self.data), 2))
+        self.zero_fill_data[:, 0] = self.data[:, 0]
+        self.zero_fill_data[:, 1] = self.windowed_data
+
+        # Zeros Padding
+        if self.ui.checkBoxPadZeros.isChecked():
+            if self.ui.radioButtonNearestPower2.isChecked():
+                self.power_of_2 = fast_fourier_transform.find_nearest_power_2(len(self.data))
+            else:
+                min_points = 2 ** int(self.ui.spinBoxMinPower2.value())
+                if min_points >= len(self.data):
+                    self.power_of_2 = int(self.ui.spinBoxMinPower2.value())
+                else:
+                    self.power_of_2 = fast_fourier_transform.find_nearest_power_2(len(self.data))
+        
+            self.zero_fill_data = fast_fourier_transform.pad_zeros(self.zero_fill_data, self.power_of_2, self.sampling_rate)  
+            self.zero_padded_size = len(self.zero_fill_data)
+            self.ui.lineEditZeroPaddedSize.setText(str(self.zero_padded_size))   
         else:
-            self.plot_data = self.data
-            self.plot_win = self.win
-            self.plot_windowed_data = self.windowed_data
+            self.zero_padded_size = self.sample_size
+            self.ui.lineEditZeroPaddedSize.setText('')
+
+        self.plot()
+        
+
+    def plot(self, file_path=None):
+        # # Plotted raw data (random sample of very large data sets)
+        # if self.ui.checkBoxLimitPlottedPoints.isChecked() and self.sample_size > self.ui.spinBoxMaxPlottedPoints.value():
+        #     plot_row = np.random.randint(0, len(self.data), size=self.ui.spinBoxMaxPlottedPoints.value())
+        #     plot_row.sort()
+        #     self.plot_data = self.data[plot_row,:]
+        #     self.plot_win = self.win[plot_row]
+        #     self.plot_windowed_data = self.windowed_data[plot_row]
+        # else:
+        self.plot_data = self.zero_fill_data
 
         # Calculate FFT
         self.ui.labelBusy.setText('<h1>Calculating FFT Data... (3/5)</h1>')
         self.repaint()
-        freq, amplitude = fast_fourier_transform.make_fft(self.data[:, 0], self.windowed_data, self.sampling_rate)  
+        freq, amplitude = fast_fourier_transform.make_fft(self.plot_data[:, 0], self.plot_data[:,1], self.sampling_rate, N=self.sample_size)  
         self.fft_data = np.empty((len(freq), 2))
         self.fft_data[:, 0] = freq
         self.fft_data[:, 1] = amplitude
         self.fft_data[:, 1] /= self.win_mean        
-
         self.max_amplitude = max(amplitude)
         self.min_amplitude = min(amplitude)
+
+        # Correct amplitude for padded 0's
+        # self.fft_data[:,1] *= self.zero_padded_size / self.sample_size
 
         # Eliminating FFT values below threashold
         if self.ui.checkBoxHideLowMagData.isChecked():
@@ -143,10 +171,6 @@ class Window(QMainWindow):
             else:
                 self.plot_binned_fft_data = self.binned_fft_data
 
-        label_sample_rate = np.round(self.sampling_rate, 2)
-        self.ui.lineEditSamplingRate.setText(str(label_sample_rate))
-        self.ui.lineEditNyquist.setText(str(np.round(label_sample_rate/2, 2)))
-
         # instead of ax.hold(False)
         self.figure.clear()
 
@@ -158,9 +182,9 @@ class Window(QMainWindow):
         # Plot data
         self.ui.labelBusy.setText('<h1>Creating Raw Data Plot... (4/5)</h1>')
         self.repaint()
-        ax1.plot(self.plot_data[:, 0], self.plot_data[:, 1], color='red')
-        ax1twin.plot(self.plot_data[:,0], self.plot_win, color='green', linewidth=5)
-        ax1.plot(self.plot_data[:,0], self.plot_windowed_data, color='blue')
+        ax1.plot(self.data[:, 0], self.data[:, 1], color='red')
+        # ax1twin.plot(self.plot_data[:,0], self.plot_win, color='green', linewidth=5)
+        ax1.plot(self.plot_data[:,0], self.plot_data[:, 1], color='blue')
         self.ui.labelBusy.setText('<h1>Creating FFT Plot... (5/5)</h1>')
         self.repaint()
 
@@ -173,7 +197,7 @@ class Window(QMainWindow):
             if self.ui.radioButtonChartContinuous.isChecked():
                 ax2.plot(self.plot_fft_data[:,0], self.plot_fft_data[:,1], color="blue", linewidth=1)
             else:
-                ax2.bar(self.plot_fft_data[:,0], self.plot_fft_data[:,1], color="blue", linewidth=0, width=2, align='center')
+                ax2.bar(self.plot_fft_data[:,0] * 2, self.plot_fft_data[:,1], color="blue", linewidth=0, width=2, align='center')
 
         # plot text
         ax1.set_title('Raw Data')
@@ -270,18 +294,18 @@ class Window(QMainWindow):
 
     def window_function(self):
         if self.ui.radioButtonBlackman.isChecked():
-            self.win = np.blackman(self.sample_size)
+            self.win = np.blackman(len(self.data))
             self.windowed_data = self.data[:,1] * self.win
             return
         elif self.ui.radioButtonHanning.isChecked():
-            self.win = np.hanning(self.sample_size)
+            self.win = np.hanning(len(self.data))
             self.windowed_data = self.data[:,1] * self.win
             return
         elif self.ui.radioButtonHamming.isChecked():
-            self.win = np.hamming(self.sample_size)
+            self.win = np.hamming(len(self.data))
             self.windowed_data = self.data[:,1] * self.win
         elif self.ui.radioButtonKaiser.isChecked():
-            self.win = np.kaiser(self.sample_size, float(self.ui.lineEditKaiserBeta.text()))
+            self.win = np.kaiser(len(self.data), float(self.ui.lineEditKaiserBeta.text()))
             self.windowed_data = self.data[:,1] * self.win        
         else:
             self.win = np.full(len(self.data), 1)
@@ -355,6 +379,12 @@ class Window(QMainWindow):
         self.canvas.draw()
         self.repaint()
 
+
+    def power_2_preview(self):
+        power = self.ui.spinBoxMinPower2.value()
+        self.ui.lineEditPower2Preview.setText(str(2 ** power))
+
+       
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
