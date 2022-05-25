@@ -189,7 +189,7 @@ class Window(QMainWindow):
 
         self.ui.labelBusy.setText('<h1>Plotting FFT Data... (5/5)</h1>')
         fftPen = pg.mkPen(color=(0, 150, 255), width=2)
-        self.fft_plot = BarGraphItem(x=self.plot_fft_data[:,0], height=self.plot_fft_data[:,1], width=1, pen=fftPen)
+        self.fft_plot = BarGraphItem(x=self.plot_fft_data[:,0], height=self.plot_fft_data[:,1], width=0, pen=fftPen)
         self.fftPlot.addItem(self.fft_plot)
         
         self.ui.busyWidget.hide()
