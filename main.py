@@ -45,7 +45,7 @@ class Window(QMainWindow):
         self.ui.pushButtonRecalculate.clicked.connect(self.recalculate)
         self.ui.toolButtonDataFile.clicked.connect(self.open_file)
         self.ui.actionAbout_FreeFFT.triggered.connect(self.about)
-        self.ui.pushButtonReload.clicked.connect(self.reload_file)
+        self.ui.pushButtonReload.clicked.connect(self.reload_data)
         self.ui.checkBoxHideLowMagData.clicked.connect(self.checkBoxHideLowMagData_clicked)
         # self.ui.pushButtonCreateWaterfall.clicked.connect(self.plot_waterfall)
         self.ui.spinBoxMinPower2.valueChanged.connect(self.power_2_preview)
@@ -88,22 +88,13 @@ class Window(QMainWindow):
             self.data = self.data[mask_time_slice_max]
 
         self.sample_size = len(self.data)
-
         self.time_elapsed = self.data[-1, 0] - self.data[0, 0]
         self.sampling_rate = self.sample_size / self.time_elapsed
+        self.nyquist_freq = self.sampling_rate / 2
 
-        self.ui.lineEditSampleSize.setText(str(self.sample_size))
-        label_sample_rate = np.round(self.sampling_rate, 2)
-        self.ui.lineEditSamplingRate.setText(str(label_sample_rate))
-        self.ui.lineEditNyquist.setText(str(np.round(label_sample_rate/2, 2)))
+        self.apply_window_function()
 
-        self.rms_value = self.rms(self.data[:,1])
-        self.peak_value = self.rms_value * math.sqrt(2)
-        self.peak_peak_value = 2 * self.peak_value
-        self.ui.lineEditRMS.setText(str(self.rms_value))
-        self.ui.lineEditPeak.setText(str(self.peak_value))
-        self.ui.lineEditPkPk.setText(str(self.peak_peak_value))
-
+    def apply_window_function(self):
         self.window_function()
 
         self.zero_fill_data = np.zeros((len(self.data), 2))
@@ -128,13 +119,11 @@ class Window(QMainWindow):
             self.zero_padded_size = self.sample_size
             self.ui.lineEditZeroPaddedSize.setText('')
 
-        self.plot()
-        
+        self.make_fft()
 
-    def plot(self, file_path=None):
-        self.plot_data = self.zero_fill_data
 
-        # Calculate FFT
+    def make_fft(self):
+        self.plot_data = self.zero_fill_data        
         self.ui.labelBusy.setText('<h1>Calculating FFT Data... (3/5)</h1>')
         self.repaint()
         freq, amplitude = fast_fourier_transform.make_fft(self.plot_data[:, 0], self.plot_data[:,1], self.sampling_rate, N=self.sample_size)  
@@ -144,6 +133,20 @@ class Window(QMainWindow):
         self.fft_data[:, 1] /= self.win_mean        
         self.max_amplitude = max(amplitude)
         self.min_amplitude = min(amplitude)
+
+        self.plot()
+
+    def plot(self, file_path=None):
+        self.rms_value = np.round(self.rms(self.data[:,1]), 2)
+        self.peak_value = np.round(self.rms_value * math.sqrt(2), 2)
+        self.peak_peak_value = 2 * self.peak_value
+
+        self.ui.lineEditSampleSize.setText(str(self.sample_size))
+        self.ui.lineEditRMS.setText(str(self.rms_value))
+        self.ui.lineEditPeak.setText(str(self.peak_value))
+        self.ui.lineEditPkPk.setText(str(self.peak_peak_value))
+        self.ui.lineEditSamplingRate.setText(str(np.round(self.sampling_rate, 2)))
+        self.ui.lineEditNyquist.setText(str(np.round(self.sampling_rate/2, 2)))
 
         # Eliminating FFT values below threashold
         if self.ui.checkBoxHideLowMagData.isChecked():
@@ -195,6 +198,7 @@ class Window(QMainWindow):
         self.ui.busyWidget.hide()
         self.ui.charterAreaWidget.show()
 
+
     def open_file(self, file=None):
         if file:
             file_path = file
@@ -213,13 +217,9 @@ class Window(QMainWindow):
         self.ui.actionPlot_Toolbar.setChecked(True)
 
 
-    def reload_file(self):
-        file_path = self.ui.lineEditDataFile.text()
-        if file_path == '':
-            self.open_file()
-            return
-        else:
-            self.open_file(file_path)
+    def reload_data(self):
+        self.clear_chart()
+        self.apply_window_function()
 
 
     def read_csv(self, file_path, min_time=None, max_time=None):
@@ -238,19 +238,8 @@ class Window(QMainWindow):
         return np.array(points)
 
     def clear_chart(self):
-        if self.data_plot:
-            self.data_plot.clear()
-            self.data_plot = None
-        if self.filter_plot:
-            self.filter_plot.clear()
-            self.filter_plot = None
-        if self.raw_plot:
-            self.raw_plot.clear()
-            self.raw_plot = None
-        if self.fft_plot:
-            self.fftPlot.removeItem(self.fft_plot)
-            self.fft_plot = None
-        self.data = None
+        self.dataPlot.clear()
+        self.fftPlot.clear()
         self.ui.lineEditSampleSize.setText('')
         self.ui.lineEditSamplingRate.setText('')
         self.ui.lineEditNyquist.setText('')
