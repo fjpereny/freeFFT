@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="resources.qrc">
-    <normaloff>:/img/icon.png</normaloff>:/img/icon.png</iconset>
+    <normaloff>:/img/icon2.png</normaloff>:/img/icon2.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
@@ -25,12 +25,6 @@
        <size>
         <width>300</width>
         <height>0</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>500</width>
-        <height>16777215</height>
        </size>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -44,7 +38,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>463</width>
+            <width>821</width>
             <height>1426</height>
            </rect>
           </property>

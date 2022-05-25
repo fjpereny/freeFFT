@@ -12,16 +12,14 @@ from PyQt5.QtCore import QThread, pyqtSignal, QObject, Qt
 from pyqtgraph import PlotWidget, plot, GraphicsLayoutWidget, PlotItem, GridItem, BarGraphItem
 import pyqtgraph as pg
 
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-
 import numpy as np
 from numpy import array, random
 
 import fast_fourier_transform
 
+# UI Imports
 from ui_main import Ui_MainWindow
-import ui_about
+import ui_about_win
 
 class Window(QMainWindow):
     def __init__(self, parent=None):
@@ -41,7 +39,6 @@ class Window(QMainWindow):
         self.ui.actionOpen.triggered.connect(self.open_file)
         self.ui.actionQuit.triggered.connect(self.close)
         self.ui.actionClose.triggered.connect(self.clear_chart)
-        self.ui.actionPlot_Toolbar.triggered.connect(self.toggle_toolbar_visible)
         self.ui.pushButtonRecalculate.clicked.connect(self.recalculate)
         self.ui.toolButtonDataFile.clicked.connect(self.open_file)
         self.ui.actionAbout_FreeFFT.triggered.connect(self.about)
@@ -77,15 +74,17 @@ class Window(QMainWindow):
     def load_csv(self, file_path):
         self.ui.labelBusy.setText('<h1>Reading CSV Data... (2/5)</h1>')
         self.repaint()
-        
 
         self.data = self.read_csv(file_path)
         
         if self.ui.checkBoxTimeSlice.isChecked():
-            mask_time_slice_min = self.data[:,0] >= self.ui.doubleSpinBoxStartTime.value()
-            self.data = self.data[mask_time_slice_min]
-            mask_time_slice_max = self.data[:,0] <= self.ui.doubleSpinBoxEndTime.value()
-            self.data = self.data[mask_time_slice_max]
+            if self.ui.doubleSpinBoxEndTime.value() > self.ui.doubleSpinBoxStartTime.value():
+                mask_time_slice_min = self.data[:,0] >= self.ui.doubleSpinBoxStartTime.value()
+                self.data = self.data[mask_time_slice_min]
+                mask_time_slice_max = self.data[:,0] <= self.ui.doubleSpinBoxEndTime.value()
+                self.data = self.data[mask_time_slice_max]
+            else:
+                print('Warning: Invalid slice times. (Are min and max backwards?)')
 
         self.sample_size = len(self.data)
         self.time_elapsed = self.data[-1, 0] - self.data[0, 0]
@@ -231,12 +230,11 @@ class Window(QMainWindow):
                 if min_time != None and time < min_time:
                     continue
                 elif max_time != None and time > max_time:
-                    return np.array(points)
-                else:
-                    amplitude = float(row[1])
-                    points.append([time, amplitude])
+                    return np.array(points)   
+                points.append([float(row[0]), float(row[1])])
         return np.array(points)
-
+    
+    
     def clear_chart(self):
         self.dataPlot.clear()
         self.fftPlot.clear()
@@ -246,12 +244,6 @@ class Window(QMainWindow):
         self.ui.lineEditRMS.setText('')
         self.ui.lineEditPeak.setText('')
         self.ui.lineEditPkPk.setText('')
-
-    def toggle_toolbar_visible(self):
-        if self.ui.actionPlot_Toolbar.isChecked():
-            self.toolbar.show()
-        else:
-            self.toolbar.hide()
 
     
     def rms(self, values):
@@ -289,7 +281,8 @@ class Window(QMainWindow):
 
 
     def about(self):
-        self.about_win = ui_about.Ui_Form()
+        self.about_win = ui_about_win.Window()
+        self.about_win.show()
         
     def plot_freq_resolution(self, fft_data):
         step_size = self.ui.doubleSpinBoxPlotFreqResolution.value()
