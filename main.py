@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import QFileDialog, QDialog, QMessageBox, QLabel
 from PyQt5.Qt import QPen
 from PyQt5.QtCore import QThread, pyqtSignal, QObject, Qt
 
-from pyqtgraph import PlotWidget, plot, GraphicsLayoutWidget, PlotItem, GridItem, BarGraphItem
+from pyqtgraph import PlotWidget, plot, GraphicsWidget, PlotItem, GridItem, BarGraphItem, ViewBox, GraphicsLayoutWidget
 import pyqtgraph as pg
 
 import numpy as np
@@ -54,6 +54,12 @@ class Window(QMainWindow):
         self.graphicsLayout = GraphicsLayoutWidget()
         self.dataPlot = PlotWidget(parent=self.graphicsLayout)
         self.fftPlot = PlotWidget(parent=self.graphicsLayout)
+
+        # Configure the plots
+        self.dataPlot.showGrid(x=True, y=True, alpha=1)
+        self.fftPlot.showGrid(x=True, y=True, alpha=1)
+        self.dataPlot.plotItem.getViewBox().setMouseMode(1)
+        self.fftPlot.plotItem.getViewBox().setMouseMode(1)
 
         # set the layout
         chartLayout = QVBoxLayout()
@@ -176,6 +182,7 @@ class Window(QMainWindow):
         windowDataPen = pg.mkPen(color=(0, 150, 255), width=2)
         filterPen = pg.mkPen(color=(0, 255, 0), width=2)
         
+
         if self.ui.checkBoxShowRawData.isChecked():
             self.raw_plot = self.dataPlot.plot(self.data[:,0], self.data[:,1], pen=dataPen)
         
