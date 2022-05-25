@@ -3,14 +3,15 @@ import sys
 import math
 
 from PyQt5.QtWidgets import QApplication, QPushButton, QVBoxLayout, QMainWindow, QWidget, QLineEdit
-from PyQt5.QtWidgets import QFileDialog, QDialog, QMessageBox
-from PyQt5.Qt import QMovie
+from PyQt5.QtWidgets import QFileDialog, QDialog, QMessageBox, QLabel
+from PyQt5.Qt import QPen
 from PyQt5.QtCore import QThread, pyqtSignal, QObject
+
+from pyqtgraph import PlotWidget, plot, GraphicsLayoutWidget, PlotItem, GridItem, BarGraphItem
+import pyqtgraph as pg
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
 import numpy as np
 from numpy import array, random
@@ -26,19 +27,10 @@ class Window(QMainWindow):
         self.ui.setupUi(self)
         
         self.data = None
+        self.data_plot = None
+        self.raw_plot = None
+        self.fft_plot = None
         self.increment = None
-
-        # a figure instance to plot on
-        self.figure = plt.figure()
-
-        # this is the Canvas Widget that displays the `figure`
-        # it takes the `figure` instance as a parameter to __init__
-        self.canvas = FigureCanvas(self.figure)
-
-        # this is the Navigation widget
-        # it takes the Canvas widget and a parent
-        self.toolbar = NavigationToolbar(self.canvas, self)
-        self.toolbar.hide()
 
         # Connections signal/slots
         self.ui.actionOpen.triggered.connect(self.open_file)
@@ -53,24 +45,28 @@ class Window(QMainWindow):
         self.ui.pushButtonCreateWaterfall.clicked.connect(self.plot_waterfall)
         self.ui.spinBoxMinPower2.valueChanged.connect(self.power_2_preview)
 
-        # set the layout
-        layout = QVBoxLayout()
-        layout.addWidget(self.toolbar)
-        layout.addWidget(self.canvas)
-        self.ui.chartWidget.setLayout(layout)
+        pg.setConfigOption('background', 'w')
+        pg.setConfigOption('foreground', 'k')
 
-        # set loading move to label object
-        # movie = QMovie('loading-blocks.gif')
-        # movie.start()
-        # self.ui.labelBusyGif.setMovie(movie)
+        self.graphicsLayout = GraphicsLayoutWidget()
+        self.dataPlot = PlotWidget(parent=self.graphicsLayout, title="Data Plot")
+        self.fftPlot = PlotWidget(parent=self.graphicsLayout, title="FFT Plot")
+
+        # set the layout
+        chartLayout = QVBoxLayout()
+        chartLayout.addWidget(self.dataPlot)
+        self.ui.chartWidget.setLayout(chartLayout)
+        fftLayout = QVBoxLayout()
+        fftLayout.addWidget(self.fftPlot)
+        self.ui.fftwidget.setLayout(fftLayout)
         self.ui.busyWidget.hide()
 
-    def load_csv(self, file_path=None):
+    def load_csv(self, file_path):
         self.ui.labelBusy.setText('<h1>Reading CSV Data... (2/5)</h1>')
         self.repaint()
         
-        if file_path:
-            self.data = self.read_csv(file_path)
+
+        self.data = self.read_csv(file_path)
         
         if self.ui.checkBoxTimeSlice.isChecked():
             mask_time_slice_min = self.data[:,0] >= self.ui.doubleSpinBoxStartTime.value()
@@ -144,9 +140,6 @@ class Window(QMainWindow):
         self.max_amplitude = max(amplitude)
         self.min_amplitude = min(amplitude)
 
-        # Correct amplitude for padded 0's
-        # self.fft_data[:,1] *= self.zero_padded_size / self.sample_size
-
         # Eliminating FFT values below threashold
         if self.ui.checkBoxHideLowMagData.isChecked():
             mask_min_fft_val = self.fft_data[:, 1] > self.ui.doubleSpinBoxHideLowMagData.value() * self.max_amplitude
@@ -171,55 +164,21 @@ class Window(QMainWindow):
             else:
                 self.plot_binned_fft_data = self.binned_fft_data
 
-        # instead of ax.hold(False)
-        self.figure.clear()
 
-        # create an axis
-        ax1 = self.figure.add_subplot(121)
-        ax1twin = ax1.twinx()
-        ax2 = self.figure.add_subplot(122)
+        self.ui.labelBusy.setText('<h1>Plotting Raw Data... (4/5)</h1>')
+        dataPen = pg.mkPen(color=(255, 0, 0), width=4)
+        windowDataPen = pg.mkPen(color=(0, 0, 255), width=4)
+        self.raw_plot = self.dataPlot.plot(self.data[:,0], self.data[:,1], pen=dataPen, title="Raw Data")
+        self.data_plot = self.dataPlot.plot(self.plot_data[:,0], self.plot_data[:,1], pen=windowDataPen)
+        self.dataPlot.setAntialiasing(True)
 
-        # Plot data
-        self.ui.labelBusy.setText('<h1>Creating Raw Data Plot... (4/5)</h1>')
-        self.repaint()
-        ax1.plot(self.data[:, 0], self.data[:, 1], color='red')
-        # ax1twin.plot(self.plot_data[:,0], self.plot_win, color='green', linewidth=5)
-        ax1.plot(self.plot_data[:,0], self.plot_data[:, 1], color='blue')
-        self.ui.labelBusy.setText('<h1>Creating FFT Plot... (5/5)</h1>')
-        self.repaint()
-
-        if self.ui.checkBoxPlotFreqRes.isChecked():
-            if self.ui.radioButtonChartContinuous.isChecked():
-                ax2.plot(self.plot_qbinned_fft_data[:,0], self.plot_binned_fft_data[:,1], color="blue", linewidth=1)
-            else:
-                ax2.bar(self.plot_binned_fft_data[:,0], self.plot_binned_fft_data[:,1], color="blue", linewidth=0, width=3, align='center')
-        else:
-            if self.ui.radioButtonChartContinuous.isChecked():
-                ax2.plot(self.plot_fft_data[:,0], self.plot_fft_data[:,1], color="blue", linewidth=1)
-            else:
-                ax2.bar(self.plot_fft_data[:,0] * 2, self.plot_fft_data[:,1], color="blue", linewidth=0, width=2, align='center')
-
-        # plot text
-        ax1.set_title('Raw Data')
-        ax1.set_xlabel('Time (sec)')
-        ax1.set_ylabel('Amplitude')
-        ax1twin.grid()
-
-        ax2.set_title('FFT Data')
-        ax2.set_xlabel('Frequency (Hz)')
-        ax2.set_ylabel('Amplitude')
-        ax2.set_xlim(left=0)
-
-
-        # for point in self.fft_data:
-        #     if point[1] >= self.max_amplitude * 0.1:
-        #         ax2.text(point[0], point[1], str(point[1].round(2)) + " @ " + str(point[0].round(2)) + 'Hz')
-
+        self.ui.labelBusy.setText('<h1>Plotting FFT Data... (5/5)</h1>')
+        fftPen = pg.mkPen(color=(0, 0, 255), width=3)
+        self.fft_plot = self.fftPlot.plot(x=self.plot_fft_data[:,0], y=self.plot_fft_data[:,1], pen=fftPen)
+        self.fftPlot.setAntialiasing(True)
+        
         self.ui.busyWidget.hide()
-        self.ui.chartWidget.show()
-        self.toolbar.configure_subplots()._tight_layout()
-        self.toolbar.configure_subplots().accept()
-        self.canvas.draw()
+        self.ui.charterAreaWidget.show()
 
     def open_file(self, file=None):
         if file:
@@ -230,19 +189,16 @@ class Window(QMainWindow):
                 return
 
         self.ui.labelBusy.setText('<h1>Opening File... (1/5)</h1>')
-        self.ui.chartWidget.hide()
+        self.ui.charterAreaWidget.hide()
         self.ui.busyWidget.show()
-        self.repaint()
         self.ui.lineEditDataFile.setText(file_path)
+        self.clear_chart()
         self.repaint()
         self.load_csv(file_path)
-        self.toolbar.show()
         self.ui.actionPlot_Toolbar.setChecked(True)
 
 
     def reload_file(self):
-        self.figure.clear() # Testing waterfall use
-        self.increment = None # Testing waterfall use
         file_path = self.ui.lineEditDataFile.text()
         if file_path == '':
             self.open_file()
@@ -267,14 +223,18 @@ class Window(QMainWindow):
         return np.array(points)
 
     def clear_chart(self):
-        self.figure.clear()
-        self.toolbar.hide()
-        self.ui.actionPlot_Toolbar.setChecked(False)
-        self.canvas.draw()
+        if self.data_plot:
+            self.data_plot.clear()
+            self.data_plot = None
+        if self.raw_plot:
+            self.raw_plot.clear()
+            self.raw_plot = None
+        if self.fft_plot:
+            self.fft_plot.clear()
+            self.fft_plot = None
         self.data = None
         self.ui.lineEditSampleSize.setText('')
         self.ui.lineEditSamplingRate.setText('')
-        self.ui.lineEditDataFile.setText('')
         self.ui.lineEditNyquist.setText('')
         self.ui.lineEditRMS.setText('')
         self.ui.lineEditPeak.setText('')
@@ -316,7 +276,7 @@ class Window(QMainWindow):
     def recalculate(self):
         if self.data is None:
             return
-        self.ui.chartWidget.hide()
+        self.ui.charterAreaWidget.hide()
         self.ui.busyWidget.show()
         self.plot()
 
