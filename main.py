@@ -2,10 +2,12 @@ import csv
 import sys
 import math
 
+import PyQt5
+
 from PyQt5.QtWidgets import QApplication, QPushButton, QVBoxLayout, QMainWindow, QWidget, QLineEdit
 from PyQt5.QtWidgets import QFileDialog, QDialog, QMessageBox, QLabel
 from PyQt5.Qt import QPen
-from PyQt5.QtCore import QThread, pyqtSignal, QObject
+from PyQt5.QtCore import QThread, pyqtSignal, QObject, Qt
 
 from pyqtgraph import PlotWidget, plot, GraphicsLayoutWidget, PlotItem, GridItem, BarGraphItem
 import pyqtgraph as pg
@@ -17,20 +19,23 @@ import numpy as np
 from numpy import array, random
 
 import fast_fourier_transform
-from ui_main import Ui_MainWindow
 
+from ui_main import Ui_MainWindow
+import ui_about
 
 class Window(QMainWindow):
     def __init__(self, parent=None):
         super(Window, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
+        self.about_win = None
         
         self.data = None
         self.data_plot = None
+        self.filter_plot = None
         self.raw_plot = None
         self.fft_plot = None
-        self.increment = None
 
         # Connections signal/slots
         self.ui.actionOpen.triggered.connect(self.open_file)
@@ -42,21 +47,29 @@ class Window(QMainWindow):
         self.ui.actionAbout_FreeFFT.triggered.connect(self.about)
         self.ui.pushButtonReload.clicked.connect(self.reload_file)
         self.ui.checkBoxHideLowMagData.clicked.connect(self.checkBoxHideLowMagData_clicked)
-        self.ui.pushButtonCreateWaterfall.clicked.connect(self.plot_waterfall)
+        # self.ui.pushButtonCreateWaterfall.clicked.connect(self.plot_waterfall)
         self.ui.spinBoxMinPower2.valueChanged.connect(self.power_2_preview)
 
-        pg.setConfigOption('background', 'w')
-        pg.setConfigOption('foreground', 'k')
+        # pg.setConfigOption('background', 'w')
+        # pg.setConfigOption('foreground', 'k')
 
+        # Create the plots
         self.graphicsLayout = GraphicsLayoutWidget()
-        self.dataPlot = PlotWidget(parent=self.graphicsLayout, title="Data Plot")
-        self.fftPlot = PlotWidget(parent=self.graphicsLayout, title="FFT Plot")
+        self.dataPlot = PlotWidget(parent=self.graphicsLayout)
+        self.fftPlot = PlotWidget(parent=self.graphicsLayout)
 
         # set the layout
         chartLayout = QVBoxLayout()
+        raw_data_label = QLabel(text="<h1>Raw Data</h1>")
+        raw_data_label.setAlignment(Qt.AlignCenter)
+        chartLayout.addWidget(raw_data_label)
         chartLayout.addWidget(self.dataPlot)
         self.ui.chartWidget.setLayout(chartLayout)
+
         fftLayout = QVBoxLayout()
+        fft_data_label = QLabel(text="<h1>FFT Data</h1>")
+        fft_data_label.setAlignment(Qt.AlignCenter)
+        fftLayout.addWidget(fft_data_label)
         fftLayout.addWidget(self.fftPlot)
         self.ui.fftwidget.setLayout(fftLayout)
         self.ui.busyWidget.hide()
@@ -119,14 +132,6 @@ class Window(QMainWindow):
         
 
     def plot(self, file_path=None):
-        # # Plotted raw data (random sample of very large data sets)
-        # if self.ui.checkBoxLimitPlottedPoints.isChecked() and self.sample_size > self.ui.spinBoxMaxPlottedPoints.value():
-        #     plot_row = np.random.randint(0, len(self.data), size=self.ui.spinBoxMaxPlottedPoints.value())
-        #     plot_row.sort()
-        #     self.plot_data = self.data[plot_row,:]
-        #     self.plot_win = self.win[plot_row]
-        #     self.plot_windowed_data = self.windowed_data[plot_row]
-        # else:
         self.plot_data = self.zero_fill_data
 
         # Calculate FFT
@@ -164,18 +169,28 @@ class Window(QMainWindow):
             else:
                 self.plot_binned_fft_data = self.binned_fft_data
 
-
         self.ui.labelBusy.setText('<h1>Plotting Raw Data... (4/5)</h1>')
-        dataPen = pg.mkPen(color=(255, 0, 0), width=4)
-        windowDataPen = pg.mkPen(color=(0, 0, 255), width=4)
-        self.raw_plot = self.dataPlot.plot(self.data[:,0], self.data[:,1], pen=dataPen, title="Raw Data")
-        self.data_plot = self.dataPlot.plot(self.plot_data[:,0], self.plot_data[:,1], pen=windowDataPen)
-        self.dataPlot.setAntialiasing(True)
+        dataPen = pg.mkPen(color=(255, 0, 0), width=2)
+        windowDataPen = pg.mkPen(color=(0, 150, 255), width=2)
+        filterPen = pg.mkPen(color=(0, 255, 0), width=2)
+        
+        if self.ui.checkBoxShowRawData.isChecked():
+            self.raw_plot = self.dataPlot.plot(self.data[:,0], self.data[:,1], pen=dataPen)
+        
+        if self.ui.checkBoxShowWindowedData.isChecked():
+            if self.ui.checkBoxShowZeroPadding.isChecked():
+                self.data_plot = self.dataPlot.plot(self.plot_data[:,0], self.plot_data[:,1], pen=windowDataPen)
+            else:
+                plot_data_no_zeros = np.resize(self.plot_data, (len(self.data), 2))
+                self.data_plot = self.dataPlot.plot(plot_data_no_zeros[:,0], plot_data_no_zeros[:,1], pen=windowDataPen)
+        
+        if self.ui.checkBoxShowWindowFunction.isChecked():
+            self.filter_plot = self.dataPlot.plot(self.data[:,0], self.win, pen=filterPen)
 
         self.ui.labelBusy.setText('<h1>Plotting FFT Data... (5/5)</h1>')
-        fftPen = pg.mkPen(color=(0, 0, 255), width=3)
-        self.fft_plot = self.fftPlot.plot(x=self.plot_fft_data[:,0], y=self.plot_fft_data[:,1], pen=fftPen)
-        self.fftPlot.setAntialiasing(True)
+        fftPen = pg.mkPen(color=(0, 150, 255), width=2)
+        self.fft_plot = BarGraphItem(x=self.plot_fft_data[:,0], height=self.plot_fft_data[:,1], width=1, pen=fftPen)
+        self.fftPlot.addItem(self.fft_plot)
         
         self.ui.busyWidget.hide()
         self.ui.charterAreaWidget.show()
@@ -226,11 +241,14 @@ class Window(QMainWindow):
         if self.data_plot:
             self.data_plot.clear()
             self.data_plot = None
+        if self.filter_plot:
+            self.filter_plot.clear()
+            self.filter_plot = None
         if self.raw_plot:
             self.raw_plot.clear()
             self.raw_plot = None
         if self.fft_plot:
-            self.fft_plot.clear()
+            self.fftPlot.removeItem(self.fft_plot)
             self.fft_plot = None
         self.data = None
         self.ui.lineEditSampleSize.setText('')
@@ -282,11 +300,8 @@ class Window(QMainWindow):
 
 
     def about(self):
-        self.about_win = QMessageBox(self)
-        self.about_win.setWindowTitle("About FreeFFT")
-        self.about_win.setText("sdlkfjasdsjasa")
-        self.about_win.show()
-
+        self.about_win = ui_about.Ui_Form()
+        
     def plot_freq_resolution(self, fft_data):
         step_size = self.ui.doubleSpinBoxPlotFreqResolution.value()
         if step_size <= 0:
@@ -318,15 +333,6 @@ class Window(QMainWindow):
         else:
             self.ui.radioButtonChartContinuous.setEnabled(True)
             self.ui.radioButtonHistogram.setEnabled(True)
-
-
-    def plot_waterfall(self):
-        if not self.increment:
-            self.figure.clear()
-            self.increment = 1
-            self.axWaterfall = self.figure.add_subplot(111, projection='3d')
-        else:
-            self.increment += 1
 
         # create an axis
         self.axWaterfall.plot(self.plot_fft_data[:, 0] * self.increment, np.ones(len(self.plot_fft_data)) * max(self.plot_data[:,0]) * self.increment, self.plot_fft_data[:, 1] * self.increment)
