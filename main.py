@@ -15,6 +15,8 @@ import pyqtgraph as pg
 import numpy as np
 from numpy import array, random
 
+import pandas as pd
+
 import fast_fourier_transform
 
 # UI Imports
@@ -222,7 +224,6 @@ class Window(QMainWindow):
         self.clear_chart()
         self.repaint()
         self.load_csv(file_path)
-        self.ui.actionPlot_Toolbar.setChecked(True)
 
 
     def reload_data(self):
@@ -231,17 +232,9 @@ class Window(QMainWindow):
 
 
     def read_csv(self, file_path, min_time=None, max_time=None):
-        points = []
-        with open(file_path) as file:
-            reader = csv.reader(file)
-            for row in reader:
-                time = float(row[0])
-                if min_time != None and time < min_time:
-                    continue
-                elif max_time != None and time > max_time:
-                    return np.array(points)   
-                points.append([float(row[0]), float(row[1])])
-        return np.array(points)
+        chunks = pd.read_csv(file_path, chunksize=1000)
+        data = pd.concat(chunks)
+        return data.to_numpy()
     
     
     def clear_chart(self):
@@ -293,6 +286,7 @@ class Window(QMainWindow):
         self.about_win = ui_about_win.Window()
         self.about_win.show()
         
+
     def plot_freq_resolution(self, fft_data):
         step_size = self.ui.doubleSpinBoxPlotFreqResolution.value()
         if step_size <= 0:
