@@ -28,7 +28,7 @@ class Window(QMainWindow):
         self.ui.setupUi(self)
 
         self.about_win = None
-        
+    
         self.data = None
         self.data_plot = None
         self.filter_plot = None
@@ -45,8 +45,6 @@ class Window(QMainWindow):
         self.ui.pushButtonRecalculate.clicked.connect(self.recalculate)
         self.ui.toolButtonDataFile.clicked.connect(self.open_file)
         
-        
-        self.ui.checkBoxHideLowMagData.clicked.connect(self.checkBoxHideLowMagData_clicked)
         
         self.ui.spinBoxMinPower2.valueChanged.connect(self.power_2_preview)
 
@@ -166,30 +164,6 @@ class Window(QMainWindow):
         self.ui.lineEditSamplingRate.setText(str(np.round(self.sampling_rate, 2)))
         self.ui.lineEditNyquist.setText(str(np.round(self.sampling_rate/2, 2)))
 
-        # Eliminating FFT values below threashold
-        if self.ui.checkBoxHideLowMagData.isChecked():
-            mask_min_fft_val = self.fft_data[:, 1] > self.ui.doubleSpinBoxHideLowMagData.value() * self.max_amplitude
-            self.plot_fft_data = self.fft_data[mask_min_fft_val]
-        else:
-            self.plot_fft_data = self.fft_data
-
-        # Setting maximum frequency for plot
-        if self.ui.checkBoxMaxPlotFreq.isChecked():
-            mask_max_freq = self.plot_fft_data[:,0] <= self.ui.doubleSpinBoxMaxPlotFreq.value()
-            self.plot_fft_data = self.plot_fft_data[mask_max_freq]
-
-        if self.ui.checkBoxPlotFreqRes.isChecked():
-            self.bins, self.amps = self.plot_freq_resolution(self.fft_data)
-            self.binned_fft_data = np.empty((len(self.bins), 2))
-            self.binned_fft_data[:,0] = self.bins
-            self.binned_fft_data[:,1] = self.amps
-
-            if self.ui.checkBoxHideLowMagData.isChecked():
-                mask_min_bin_fft_val = self.binned_fft_data[:,1] > self.ui.doubleSpinBoxHideLowMagData.value() * self.max_amplitude
-                self.plot_binned_fft_data = self.binned_fft_data[mask_min_bin_fft_val]
-            else:
-                self.plot_binned_fft_data = self.binned_fft_data
-
         self.ui.labelBusy.setText('<h1>Plotting Raw Data... (4/5)</h1>')
         dataPen = pg.mkPen(color=(255, 0, 0), width=2)
         windowDataPen = pg.mkPen(color=(0, 150, 255), width=2)
@@ -211,7 +185,7 @@ class Window(QMainWindow):
 
         self.ui.labelBusy.setText('<h1>Plotting FFT Data... (5/5)</h1>')
         fftPen = pg.mkPen(color=(0, 150, 255), width=2)
-        self.fft_plot = BarGraphItem(x=self.plot_fft_data[:,0], height=self.plot_fft_data[:,1], width=0, pen=fftPen)
+        self.fft_plot = BarGraphItem(x=self.fft_data[:,0], height=self.fft_data[:,1], width=0, pen=fftPen)
         self.fftPlot.addItem(self.fft_plot)
         
         self.ui.busyWidget.hide()
@@ -236,13 +210,24 @@ class Window(QMainWindow):
 
 
     def reload_data(self):
-        pass
+        file_path = self.ui.lineEditDataFile.text()
+        if file_path == '':
+            self.open_file()
+        else:
+            self.load_csv(file_path)
 
 
     def read_csv(self, file_path, min_time=None, max_time=None):
-        chunks = pd.read_csv(file_path, chunksize=1000)
-        data = pd.concat(chunks)
-        return data.to_numpy()
+        try:
+            chunks = pd.read_csv(file_path, chunksize=1000)
+            data = pd.concat(chunks)
+            return data.to_numpy()
+        except TypeError as err:
+            print(err)
+            self.ui.labelBusy.setText('<h1>File Read Error: Unable to parse CSV file.</h1>\n<h2>Please ensure the selected file is in the correct format.</h2>')    
+        except pd.errors.ParserError as err:
+            print(err)
+            self.ui.labelBusy.setText('<h1>File Read Error: Unable to parse CSV file.</h1>\n<h2>Please ensure the selected file is in the correct format.</h2>')    
     
     
     def clear_chart(self):
