@@ -345,6 +345,7 @@ class Window(QMainWindow):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
+    # Allows opening file directly from terminal
     if len(sys.argv) > 1:
         file = sys.argv[1]
         main = Window(file)
