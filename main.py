@@ -22,7 +22,7 @@ from ui_main import Ui_MainWindow
 import ui_about_win
 
 class Window(QMainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, file=None):
         super(Window, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -44,7 +44,6 @@ class Window(QMainWindow):
         self.ui.actionAbout_FreeFFT.triggered.connect(self.about)
         self.ui.pushButtonReload.clicked.connect(self.reload_data)
         self.ui.checkBoxHideLowMagData.clicked.connect(self.checkBoxHideLowMagData_clicked)
-        # self.ui.pushButtonCreateWaterfall.clicked.connect(self.plot_waterfall)
         self.ui.spinBoxMinPower2.valueChanged.connect(self.power_2_preview)
 
         # pg.setConfigOption('background', 'w')
@@ -76,6 +75,9 @@ class Window(QMainWindow):
         fftLayout.addWidget(self.fftPlot)
         self.ui.fftwidget.setLayout(fftLayout)
         self.ui.busyWidget.hide()
+
+        if file:
+            self.open_file(file)
 
     def load_csv(self, file_path):
         self.ui.labelBusy.setText('<h1>Reading CSV Data... (2/5)</h1>')
@@ -343,7 +345,11 @@ class Window(QMainWindow):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
-    main = Window()
+    if len(sys.argv) > 1:
+        file = sys.argv[1]
+        main = Window(file)
+    else:
+        main = Window()
     main.showMaximized()
     main.show()
 
