@@ -2,8 +2,9 @@ import sys
 import math
 
 import PyQt5
+from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtWidgets import QApplication, QPushButton, QVBoxLayout, QMainWindow, QWidget, QLineEdit
-from PyQt5.QtWidgets import QFileDialog, QDialog, QMessageBox, QLabel
+from PyQt5.QtWidgets import QFileDialog, QDialog, QMessageBox, QLabel, QSplitter, QShortcut
 from PyQt5.Qt import QPen
 from PyQt5.QtCore import QThread, pyqtSignal, QObject, Qt
 
@@ -45,7 +46,6 @@ class Window(QMainWindow):
         self.ui.pushButtonRecalculate.clicked.connect(self.recalculate)
         self.ui.toolButtonDataFile.clicked.connect(self.open_file)
         
-        
         self.ui.spinBoxMinPower2.valueChanged.connect(self.power_2_preview)
 
         self.ui.checkBoxShowRawData.clicked.connect(self.replot_all)
@@ -83,13 +83,35 @@ class Window(QMainWindow):
         fftLayout.addWidget(fft_data_label)
         fftLayout.addWidget(self.fftPlot)
         self.ui.fftwidget.setLayout(fftLayout)
-        self.ui.busyWidget.hide()
+        self.ui.labelBusy.hide()
+
+        self.splitter = QSplitter(parent=self)
+        self.splitter.addWidget(self.ui.widgetLeftControls)
+        self.splitter.addWidget(self.ui.chartWidget)
+        self.splitter.addWidget(self.ui.fftwidget)
+        self.splitter.addWidget(self.ui.labelBusy)
+        self.setCentralWidget(self.splitter)
+        self.splitter.setStretchFactor(0, 1)
+        self.splitter.setStretchFactor(1, 4)
+        self.splitter.setStretchFactor(2, 4)
+        self.splitter.setStretchFactor(3, 8)
 
         if file:
             self.open_file(file)
 
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_F5:
+            self.recalculate()
+
+        if event.key() == Qt.Key_Space:
+            self.dataPlotViewBox.autoRange()
+            self.fftPlotViewBox.autoRange()
+
+
     def load_csv(self, file_path):
         self.ui.labelBusy.setText('<h1>Reading CSV Data... (2/5)</h1>')
+        self.ui.labelBusy.show()
         self.repaint()
 
         self.data = self.read_csv(file_path)
@@ -149,7 +171,6 @@ class Window(QMainWindow):
         self.fft_data[:, 1] /= self.win_mean        
         self.max_amplitude = max(amplitude)
         self.min_amplitude = min(amplitude)
-
         self.plot()
 
     def plot(self, file_path=None):
@@ -188,8 +209,9 @@ class Window(QMainWindow):
         self.fft_plot = BarGraphItem(x=self.fft_data[:,0], height=self.fft_data[:,1], width=0, pen=fftPen)
         self.fftPlot.addItem(self.fft_plot)
         
-        self.ui.busyWidget.hide()
-        self.ui.charterAreaWidget.show()
+        self.ui.labelBusy.hide()
+        self.ui.chartWidget.show()
+        self.ui.fftwidget.show()
 
 
     def open_file(self, file=None):
@@ -200,9 +222,10 @@ class Window(QMainWindow):
             if file_path == '':
                 return
 
+        self.ui.labelBusy.show()
         self.ui.labelBusy.setText('<h1>Opening File... (1/5)</h1>')
-        self.ui.charterAreaWidget.hide()
-        self.ui.busyWidget.show()
+        self.ui.chartWidget.hide()
+        self.ui.fftwidget.hide()
         self.ui.lineEditDataFile.setText(file_path)
         self.clear_chart()
         self.repaint()
@@ -329,9 +352,9 @@ class Window(QMainWindow):
 
       
     def replot_all(self):
+        self.clear_chart()
         if self.data is None:
             return
-        self.clear_chart()
         self.plot()
 
 

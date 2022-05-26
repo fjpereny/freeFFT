@@ -20,17 +20,11 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <widget class="QWidget" name="widget" native="true">
+     <widget class="QWidget" name="widgetLeftControls" native="true">
       <property name="minimumSize">
        <size>
         <width>300</width>
         <height>0</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>500</width>
-        <height>16777215</height>
        </size>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -75,8 +69,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>468</width>
-                <height>965</height>
+                <width>434</width>
+                <height>944</height>
                </rect>
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -554,6 +548,11 @@
            <string>Signal Generator</string>
           </attribute>
          </widget>
+         <widget class="QWidget" name="tabConditionMonitoring">
+          <attribute name="title">
+           <string>Condition Monitoring</string>
+          </attribute>
+         </widget>
         </widget>
        </item>
       </layout>
@@ -563,10 +562,24 @@
      <widget class="QWidget" name="charterAreaWidget" native="true">
       <layout class="QHBoxLayout" name="horizontalLayout_4">
        <item>
-        <widget class="QWidget" name="chartWidget" native="true"/>
+        <widget class="QWidget" name="chartWidget" native="true">
+         <property name="minimumSize">
+          <size>
+           <width>300</width>
+           <height>0</height>
+          </size>
+         </property>
+        </widget>
        </item>
        <item>
-        <widget class="QWidget" name="fftwidget" native="true"/>
+        <widget class="QWidget" name="fftwidget" native="true">
+         <property name="minimumSize">
+          <size>
+           <width>300</width>
+           <height>0</height>
+          </size>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
