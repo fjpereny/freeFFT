@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1077, 1131)
+        MainWindow.resize(1099, 1131)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/img/icon2.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
@@ -291,7 +291,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addWidget(self.busyWidget)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1077, 30))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1099, 30))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtWidgets.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")
@@ -419,7 +419,8 @@ class Ui_MainWindow(object):
         self.actionRecent_Files.setText(_translate("MainWindow", "&Recent Files"))
         self.actionClose.setText(_translate("MainWindow", "&Close"))
         self.actionClose.setShortcut(_translate("MainWindow", "Ctrl+W"))
-        self.actionRefresh_Data.setText(_translate("MainWindow", "Refresh Data"))
+        self.actionRefresh_Data.setText(_translate("MainWindow", "Recalculate Data"))
+        self.actionRefresh_Data.setShortcut(_translate("MainWindow", "F5"))
         self.actionExport.setText(_translate("MainWindow", "&Export"))
         self.actionQuit.setText(_translate("MainWindow", "&Quit"))
         self.actionQuit.setShortcut(_translate("MainWindow", "Ctrl+Q"))

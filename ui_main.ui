@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1077</width>
+    <width>1099</width>
     <height>1131</height>
    </rect>
   </property>
@@ -607,7 +607,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1077</width>
+     <width>1099</width>
      <height>30</height>
     </rect>
    </property>
@@ -684,7 +684,10 @@
   </action>
   <action name="actionRefresh_Data">
    <property name="text">
-    <string>Refresh Data</string>
+    <string>Recalculate Data</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
    </property>
   </action>
   <action name="actionExport">

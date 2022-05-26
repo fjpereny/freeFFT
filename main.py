@@ -47,11 +47,11 @@ class Window(QMainWindow):
         self.ui.statusbar.addPermanentWidget(self.file_label)
         self.ui.statusbar.addPermanentWidget(Statusbar_VLine())
 
-
         # Connections signal/slots
         self.ui.actionOpen.triggered.connect(self.open_file)
         self.ui.actionQuit.triggered.connect(self.close)
         self.ui.actionClose.triggered.connect(self.clear_chart)
+        self.ui.actionRefresh_Data.triggered.connect(self.recalculate)
         self.ui.actionAbout_FreeFFT.triggered.connect(self.about)
 
         self.ui.pushButtonReload.clicked.connect(self.reload_data)
@@ -136,7 +136,7 @@ class Window(QMainWindow):
             self.dataPlotViewBox.setMouseMode(1)
             self.fftPlotViewBox.setMouseMode(1)
 
-            self.mouse_mode_label.setText("Rect Select")
+            self.mouse_mode_label.setText("Rect Mode")
             self.setCursor(Qt.ArrowCursor)
 
 
