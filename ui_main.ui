@@ -27,9 +27,21 @@
         <height>0</height>
        </size>
       </property>
+      <property name="maximumSize">
+       <size>
+        <width>500</width>
+        <height>16777215</height>
+       </size>
+      </property>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
         <widget class="QScrollArea" name="scrollArea">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="widgetResizable">
           <bool>true</bool>
          </property>
@@ -38,8 +50,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>821</width>
-            <height>1426</height>
+            <width>463</width>
+            <height>1384</height>
            </rect>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -51,15 +63,43 @@
              <item>
               <widget class="QGroupBox" name="groupBox_2">
                <property name="title">
-                <string>General Data</string>
+                <string>Data File</string>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_2">
                 <item>
                  <layout class="QGridLayout" name="gridLayout">
-                  <item row="8" column="2">
-                   <widget class="QLabel" name="label_4">
+                  <item row="14" column="1">
+                   <widget class="QLineEdit" name="lineEditPkPk">
+                    <property name="readOnly">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="5" column="2">
+                   <widget class="QLabel" name="label_12">
                     <property name="text">
-                     <string>Hz</string>
+                     <string>sec</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="12" column="1">
+                   <widget class="QLineEdit" name="lineEditRMS">
+                    <property name="readOnly">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="0">
+                   <widget class="QLabel" name="labelFileName">
+                    <property name="text">
+                     <string>Data File</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="14" column="0">
+                   <widget class="QLabel" name="label_7">
+                    <property name="text">
+                     <string>Pk-Pk (Calculated)</string>
                     </property>
                    </widget>
                   </item>
@@ -70,93 +110,17 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="11" column="1">
-                   <widget class="QLineEdit" name="lineEditPkPk">
-                    <property name="readOnly">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="5" column="1">
-                   <widget class="QLineEdit" name="lineEditSampleSize">
-                    <property name="readOnly">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="11" column="0">
-                   <widget class="QLabel" name="label_7">
-                    <property name="text">
-                     <string>Pk-Pk (Calculated)</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="5" column="0">
-                   <widget class="QLabel" name="labelSampleSize">
-                    <property name="text">
-                     <string>Sample Size</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="9" column="1">
-                   <widget class="QLineEdit" name="lineEditRMS">
-                    <property name="readOnly">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="7" column="2">
-                   <widget class="QLabel" name="label_3">
-                    <property name="text">
-                     <string>Hz</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="9" column="0">
-                   <widget class="QLabel" name="label_2">
-                    <property name="text">
-                     <string>RMS</string>
-                    </property>
-                   </widget>
-                  </item>
                   <item row="8" column="0">
-                   <widget class="QLabel" name="labelNyquistFreq">
+                   <widget class="QLabel" name="label_15">
                     <property name="text">
-                     <string>Nyquist Frequency</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="7" column="1">
-                   <widget class="QLineEdit" name="lineEditSamplingRate">
-                    <property name="readOnly">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="8" column="1">
-                   <widget class="QLineEdit" name="lineEditNyquist">
-                    <property name="readOnly">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="10" column="1">
-                   <widget class="QLineEdit" name="lineEditPeak">
-                    <property name="readOnly">
-                     <bool>true</bool>
+                     <string>Zero Padded Size</string>
                     </property>
                    </widget>
                   </item>
                   <item row="7" column="0">
-                   <widget class="QLabel" name="labelSamplingRate">
-                    <property name="maximumSize">
-                     <size>
-                      <width>16777215</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
+                   <widget class="QLabel" name="labelSampleSize">
                     <property name="text">
-                     <string>Sampling Rate</string>
+                     <string>Sample Size</string>
                     </property>
                    </widget>
                   </item>
@@ -173,29 +137,142 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="10" column="0">
+                  <item row="12" column="0">
+                   <widget class="QLabel" name="label_2">
+                    <property name="text">
+                     <string>RMS</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="9" column="2">
+                   <widget class="QLabel" name="label_3">
+                    <property name="text">
+                     <string>Hz</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="10" column="2">
+                   <widget class="QLabel" name="label_4">
+                    <property name="text">
+                     <string>Hz</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="7" column="1">
+                   <widget class="QLineEdit" name="lineEditSampleSize">
+                    <property name="readOnly">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="9" column="0">
+                   <widget class="QLabel" name="labelSamplingRate">
+                    <property name="maximumSize">
+                     <size>
+                      <width>16777215</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string>Sampling Rate</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="10" column="1">
+                   <widget class="QLineEdit" name="lineEditNyquist">
+                    <property name="readOnly">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="9" column="1">
+                   <widget class="QLineEdit" name="lineEditSamplingRate">
+                    <property name="readOnly">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="13" column="0">
                    <widget class="QLabel" name="label_6">
                     <property name="text">
                      <string>Peak (Calculated)</string>
                     </property>
                    </widget>
                   </item>
-                  <item row="3" column="0">
-                   <widget class="QLabel" name="labelFileName">
+                  <item row="5" column="0" colspan="2">
+                   <layout class="QGridLayout" name="gridLayout_4">
+                    <item row="0" column="5">
+                     <widget class="QDoubleSpinBox" name="doubleSpinBoxStartTime">
+                      <property name="maximum">
+                       <double>1000.000000000000000</double>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="7">
+                     <widget class="QDoubleSpinBox" name="doubleSpinBoxEndTime">
+                      <property name="maximum">
+                       <double>1000.000000000000000</double>
+                      </property>
+                      <property name="value">
+                       <double>1.000000000000000</double>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="4">
+                     <widget class="QLabel" name="label_10">
+                      <property name="text">
+                       <string>Start</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="6">
+                     <widget class="QLabel" name="label_11">
+                      <property name="text">
+                       <string>End</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="1">
+                     <widget class="QCheckBox" name="checkBoxTimeSlice">
+                      <property name="text">
+                       <string>Time Slice</string>
+                      </property>
+                      <property name="checked">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </item>
+                  <item row="10" column="0">
+                   <widget class="QLabel" name="labelNyquistFreq">
                     <property name="text">
-                     <string>Data File</string>
+                     <string>Nyquist Frequency</string>
                     </property>
                    </widget>
                   </item>
-                  <item row="6" column="0">
-                   <widget class="QLabel" name="label_15">
-                    <property name="text">
-                     <string>Zero Padded Size</string>
+                  <item row="13" column="1">
+                   <widget class="QLineEdit" name="lineEditPeak">
+                    <property name="readOnly">
+                     <bool>true</bool>
                     </property>
                    </widget>
                   </item>
-                  <item row="6" column="1">
+                  <item row="8" column="1">
                    <widget class="QLineEdit" name="lineEditZeroPaddedSize"/>
+                  </item>
+                  <item row="4" column="1">
+                   <widget class="QPushButton" name="pushButtonReload">
+                    <property name="text">
+                     <string>Reload Data</string>
+                    </property>
+                   </widget>
                   </item>
                  </layout>
                 </item>
@@ -208,6 +285,16 @@
                 <string>Plot Options</string>
                </property>
                <layout class="QGridLayout" name="gridLayout_7">
+                <item row="1" column="2">
+                 <widget class="QCheckBox" name="checkBoxShowZeroPadding">
+                  <property name="text">
+                   <string>Show Zero Padding</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
                 <item row="0" column="2">
                  <widget class="QCheckBox" name="checkBoxShowWindowFunction">
                   <property name="text">
@@ -238,13 +325,72 @@
                   </property>
                  </widget>
                 </item>
-                <item row="1" column="2">
-                 <widget class="QCheckBox" name="checkBoxShowZeroPadding">
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="groupBox_6">
+               <property name="title">
+                <string>Zero Padding</string>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_6">
+                <item row="1" column="0">
+                 <widget class="QRadioButton" name="radioButtonNearestPower2">
                   <property name="text">
-                   <string>Show Zero Padding</string>
+                   <string>Nearest Power of 2</string>
                   </property>
                   <property name="checked">
                    <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="2">
+                 <widget class="QLineEdit" name="lineEditPower2Preview">
+                  <property name="maximumSize">
+                   <size>
+                    <width>125</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>1024</string>
+                  </property>
+                  <property name="readOnly">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="0">
+                 <widget class="QCheckBox" name="checkBoxPadZeros">
+                  <property name="text">
+                   <string>Pad Zeros</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QRadioButton" name="radioButtonMinPower2">
+                  <property name="text">
+                   <string>Minimum Power of 2</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QSpinBox" name="spinBoxMinPower2">
+                  <property name="maximum">
+                   <number>64</number>
+                  </property>
+                  <property name="value">
+                   <number>10</number>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="3">
+                 <widget class="QLabel" name="label_16">
+                  <property name="text">
+                   <string>Points</string>
                   </property>
                  </widget>
                 </item>
@@ -252,234 +398,88 @@
               </widget>
              </item>
              <item>
-              <widget class="QGroupBox" name="groupBox_4">
+              <widget class="QGroupBox" name="groupBox">
                <property name="title">
-                <string>Data Options</string>
+                <string>Windowing Options</string>
                </property>
-               <layout class="QVBoxLayout" name="verticalLayout_5">
-                <item>
-                 <layout class="QGridLayout" name="gridLayout_4">
-                  <item row="0" column="4">
-                   <widget class="QDoubleSpinBox" name="doubleSpinBoxEndTime">
-                    <property name="value">
-                     <double>1.000000000000000</double>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="3">
-                   <widget class="QLabel" name="label_11">
-                    <property name="text">
-                     <string>End</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="2">
-                   <widget class="QDoubleSpinBox" name="doubleSpinBoxStartTime"/>
-                  </item>
-                  <item row="0" column="0">
-                   <widget class="QCheckBox" name="checkBoxTimeSlice">
-                    <property name="text">
-                     <string>Time Slice</string>
-                    </property>
-                    <property name="checked">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="1">
-                   <widget class="QLabel" name="label_10">
-                    <property name="text">
-                     <string>Start</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="5">
-                   <widget class="QLabel" name="label_12">
-                    <property name="text">
-                     <string>sec</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
+               <layout class="QGridLayout" name="gridLayout_2">
+                <item row="7" column="2">
+                 <widget class="QDoubleSpinBox" name="doubleSpinBoxKaiserBeta"/>
                 </item>
-                <item>
-                 <widget class="QGroupBox" name="groupBox_6">
-                  <property name="title">
-                   <string>Zero Padding</string>
-                  </property>
-                  <layout class="QGridLayout" name="gridLayout_6">
-                   <item row="1" column="0">
-                    <widget class="QRadioButton" name="radioButtonNearestPower2">
-                     <property name="text">
-                      <string>Nearest Power of 2</string>
-                     </property>
-                     <property name="checked">
-                      <bool>true</bool>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="2">
-                    <widget class="QLineEdit" name="lineEditPower2Preview">
-                     <property name="maximumSize">
-                      <size>
-                       <width>125</width>
-                       <height>16777215</height>
-                      </size>
-                     </property>
-                     <property name="text">
-                      <string>1024</string>
-                     </property>
-                     <property name="readOnly">
-                      <bool>true</bool>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="0">
-                    <widget class="QCheckBox" name="checkBoxPadZeros">
-                     <property name="text">
-                      <string>Pad Zeros</string>
-                     </property>
-                     <property name="checked">
-                      <bool>true</bool>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="0">
-                    <widget class="QRadioButton" name="radioButtonMinPower2">
-                     <property name="text">
-                      <string>Minimum Power of 2</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="1">
-                    <widget class="QSpinBox" name="spinBoxMinPower2">
-                     <property name="maximum">
-                      <number>64</number>
-                     </property>
-                     <property name="value">
-                      <number>10</number>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="3">
-                    <widget class="QLabel" name="label_16">
-                     <property name="text">
-                      <string>Points</string>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QGroupBox" name="groupBox">
-                  <property name="title">
-                   <string>Windowing Options</string>
-                  </property>
-                  <layout class="QGridLayout" name="gridLayout_2">
-                   <item row="7" column="1">
-                    <widget class="QLabel" name="label">
-                     <property name="text">
-                      <string>β</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="3" column="0">
-                    <widget class="QRadioButton" name="radioButton_7">
-                     <property name="text">
-                      <string>Exponential</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="9" column="0">
-                    <widget class="QRadioButton" name="radioButton_8">
-                     <property name="text">
-                      <string>Flat Top</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="7" column="0">
-                    <widget class="QRadioButton" name="radioButtonKaiser">
-                     <property name="text">
-                      <string>Kaiser-Bessel</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="6" column="0">
-                    <widget class="QRadioButton" name="radioButtonHanning">
-                     <property name="text">
-                      <string>Hanning</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="4" column="0">
-                    <widget class="QRadioButton" name="radioButtonHamming">
-                     <property name="text">
-                      <string>Hamming</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="0">
-                    <widget class="QRadioButton" name="radioButtonUniform">
-                     <property name="text">
-                      <string>Uniform</string>
-                     </property>
-                     <property name="checked">
-                      <bool>true</bool>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="0">
-                    <widget class="QRadioButton" name="radioButtonBlackman">
-                     <property name="text">
-                      <string>Blackman</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="7" column="2">
-                    <widget class="QLineEdit" name="lineEditKaiserBeta">
-                     <property name="text">
-                      <string>15</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="7" column="3">
-                    <spacer name="horizontalSpacer">
-                     <property name="orientation">
-                      <enum>Qt::Horizontal</enum>
-                     </property>
-                     <property name="sizeHint" stdset="0">
-                      <size>
-                       <width>40</width>
-                       <height>20</height>
-                      </size>
-                     </property>
-                    </spacer>
-                   </item>
-                   <item row="10" column="0">
-                    <widget class="QRadioButton" name="radioButton_5">
-                     <property name="text">
-                      <string>Force</string>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="pushButtonReload">
+                <item row="1" column="0">
+                 <widget class="QRadioButton" name="radioButtonUniform">
                   <property name="text">
-                   <string>Reload Data</string>
+                   <string>Uniform</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QRadioButton" name="radioButtonBlackman">
+                  <property name="text">
+                   <string>Blackman</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="10" column="0">
+                 <widget class="QRadioButton" name="radioButton_5">
+                  <property name="text">
+                   <string>Force</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="0">
+                 <widget class="QRadioButton" name="radioButtonHamming">
+                  <property name="text">
+                   <string>Hamming</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="7" column="0">
+                 <widget class="QRadioButton" name="radioButtonKaiser">
+                  <property name="text">
+                   <string>Kaiser-Bessel</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="9" column="0">
+                 <widget class="QRadioButton" name="radioButton_8">
+                  <property name="text">
+                   <string>Flat Top</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="6" column="0">
+                 <widget class="QRadioButton" name="radioButtonHanning">
+                  <property name="text">
+                   <string>Hanning</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="7" column="1">
+                 <widget class="QLabel" name="label">
+                  <property name="text">
+                   <string>β</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="0">
+                 <widget class="QRadioButton" name="radioButton_7">
+                  <property name="text">
+                   <string>Exponential</string>
                   </property>
                  </widget>
                 </item>
                </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButtonRecalculate">
+               <property name="text">
+                <string>Recalculate (F5)</string>
+               </property>
               </widget>
              </item>
              <item>
@@ -514,13 +514,6 @@
                     </property>
                     <property name="value">
                      <double>1.000000000000000</double>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="8" column="0" colspan="3">
-                   <widget class="QPushButton" name="pushButtonRecalculate">
-                    <property name="text">
-                     <string>Recalculate FFT</string>
                     </property>
                    </widget>
                   </item>
@@ -831,17 +824,13 @@
   <tabstop>lineEditRMS</tabstop>
   <tabstop>lineEditPeak</tabstop>
   <tabstop>lineEditPkPk</tabstop>
-  <tabstop>checkBoxTimeSlice</tabstop>
-  <tabstop>doubleSpinBoxStartTime</tabstop>
   <tabstop>doubleSpinBoxEndTime</tabstop>
-  <tabstop>pushButtonReload</tabstop>
   <tabstop>radioButtonUniform</tabstop>
   <tabstop>radioButtonBlackman</tabstop>
   <tabstop>radioButton_7</tabstop>
   <tabstop>radioButtonHamming</tabstop>
   <tabstop>radioButtonHanning</tabstop>
   <tabstop>radioButtonKaiser</tabstop>
-  <tabstop>lineEditKaiserBeta</tabstop>
   <tabstop>radioButton_8</tabstop>
   <tabstop>radioButton_5</tabstop>
   <tabstop>radioButtonChartContinuous</tabstop>
@@ -854,7 +843,6 @@
   <tabstop>spinBoxMaxPlottedPoints</tabstop>
   <tabstop>checkBoxHideLowMagData</tabstop>
   <tabstop>doubleSpinBoxHideLowMagData</tabstop>
-  <tabstop>pushButtonRecalculate</tabstop>
  </tabstops>
  <resources>
   <include location="resources.qrc"/>

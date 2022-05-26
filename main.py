@@ -1,9 +1,7 @@
-import csv
 import sys
 import math
 
 import PyQt5
-
 from PyQt5.QtWidgets import QApplication, QPushButton, QVBoxLayout, QMainWindow, QWidget, QLineEdit
 from PyQt5.QtWidgets import QFileDialog, QDialog, QMessageBox, QLabel
 from PyQt5.Qt import QPen
@@ -41,12 +39,21 @@ class Window(QMainWindow):
         self.ui.actionOpen.triggered.connect(self.open_file)
         self.ui.actionQuit.triggered.connect(self.close)
         self.ui.actionClose.triggered.connect(self.clear_chart)
+        self.ui.actionAbout_FreeFFT.triggered.connect(self.about)
+
+        self.ui.pushButtonReload.clicked.connect(self.reload_data)
         self.ui.pushButtonRecalculate.clicked.connect(self.recalculate)
         self.ui.toolButtonDataFile.clicked.connect(self.open_file)
-        self.ui.actionAbout_FreeFFT.triggered.connect(self.about)
-        self.ui.pushButtonReload.clicked.connect(self.reload_data)
+        
+        
         self.ui.checkBoxHideLowMagData.clicked.connect(self.checkBoxHideLowMagData_clicked)
+        
         self.ui.spinBoxMinPower2.valueChanged.connect(self.power_2_preview)
+
+        self.ui.checkBoxShowRawData.clicked.connect(self.replot_all)
+        self.ui.checkBoxShowWindowedData.clicked.connect(self.replot_all)
+        self.ui.checkBoxShowWindowFunction.clicked.connect(self.replot_all)
+        self.ui.checkBoxShowZeroPadding.clicked.connect(self.replot_all)
 
         # pg.setConfigOption('background', 'w')
         # pg.setConfigOption('foreground', 'k')
@@ -55,12 +62,14 @@ class Window(QMainWindow):
         self.graphicsLayout = GraphicsLayoutWidget()
         self.dataPlot = PlotWidget(parent=self.graphicsLayout)
         self.fftPlot = PlotWidget(parent=self.graphicsLayout)
+        self.dataPlotViewBox = self.dataPlot.plotItem.getViewBox()
+        self.fftPlotViewBox = self.fftPlot.plotItem.getViewBox()
 
         # Configure the plots
         self.dataPlot.showGrid(x=True, y=True, alpha=1)
         self.fftPlot.showGrid(x=True, y=True, alpha=1)
-        self.dataPlot.plotItem.getViewBox().setMouseMode(1)
-        self.fftPlot.plotItem.getViewBox().setMouseMode(1)
+        self.dataPlotViewBox.setMouseMode(1)
+        self.fftPlotViewBox.setMouseMode(1)
 
         # set the layout
         chartLayout = QVBoxLayout()
@@ -227,8 +236,7 @@ class Window(QMainWindow):
 
 
     def reload_data(self):
-        self.clear_chart()
-        self.apply_window_function()
+        pass
 
 
     def read_csv(self, file_path, min_time=None, max_time=None):
@@ -266,7 +274,7 @@ class Window(QMainWindow):
             self.win = np.hamming(len(self.data))
             self.windowed_data = self.data[:,1] * self.win
         elif self.ui.radioButtonKaiser.isChecked():
-            self.win = np.kaiser(len(self.data), float(self.ui.lineEditKaiserBeta.text()))
+            self.win = np.kaiser(len(self.data), self.ui.doubleSpinBoxKaiserBeta.value())
             self.windowed_data = self.data[:,1] * self.win        
         else:
             self.win = np.full(len(self.data), 1)
@@ -277,9 +285,8 @@ class Window(QMainWindow):
     def recalculate(self):
         if self.data is None:
             return
-        self.ui.charterAreaWidget.hide()
-        self.ui.busyWidget.show()
-        self.plot()
+        self.clear_chart()
+        self.apply_window_function()
 
 
     def about(self):
@@ -335,7 +342,14 @@ class Window(QMainWindow):
         power = self.ui.spinBoxMinPower2.value()
         self.ui.lineEditPower2Preview.setText(str(2 ** power))
 
-       
+      
+    def replot_all(self):
+        if self.data is None:
+            return
+        self.clear_chart()
+        self.plot()
+
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
