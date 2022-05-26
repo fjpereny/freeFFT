@@ -3,9 +3,9 @@ import math
 
 import PyQt5
 from PyQt5 import QtGui, QtWidgets
-from PyQt5.QtWidgets import QApplication, QPushButton, QVBoxLayout, QMainWindow, QWidget, QLineEdit
-from PyQt5.QtWidgets import QFileDialog, QDialog, QMessageBox, QLabel, QSplitter, QShortcut
-from PyQt5.Qt import QPen
+from PyQt5.QtWidgets import QApplication, QPushButton, QVBoxLayout, QHBoxLayout, QMainWindow, QWidget, QLineEdit
+from PyQt5.QtWidgets import QFileDialog, QDialog, QMessageBox, QLabel, QSplitter, QShortcut, QFrame
+from PyQt5.Qt import QPen, QCursor, QMouseEvent
 from PyQt5.QtCore import QThread, pyqtSignal, QObject, Qt
 
 from pyqtgraph import PlotWidget, plot, GraphicsWidget, PlotItem, GridItem, BarGraphItem, ViewBox, GraphicsLayoutWidget
@@ -17,6 +17,7 @@ from numpy import array, random
 import pandas as pd
 
 import fast_fourier_transform
+from statusbar_Vline import Statusbar_VLine
 
 # UI Imports
 from ui_main import Ui_MainWindow
@@ -35,6 +36,17 @@ class Window(QMainWindow):
         self.filter_plot = None
         self.raw_plot = None
         self.fft_plot = None
+
+        self.mouse_mode_label = QLabel("Rect Select")
+        self.file_label = QLabel("File: N/A")
+        self.ui.statusbar.setMinimumHeight(30)
+        self.ui.statusbar.showMessage("Welcome to FreeFFT!")
+        self.ui.statusbar.addPermanentWidget(Statusbar_VLine())
+        self.ui.statusbar.addPermanentWidget(self.mouse_mode_label)
+        self.ui.statusbar.addPermanentWidget(Statusbar_VLine())
+        self.ui.statusbar.addPermanentWidget(self.file_label)
+        self.ui.statusbar.addPermanentWidget(Statusbar_VLine())
+
 
         # Connections signal/slots
         self.ui.actionOpen.triggered.connect(self.open_file)
@@ -105,9 +117,46 @@ class Window(QMainWindow):
             self.recalculate()
 
         if event.key() == Qt.Key_Space:
-            self.dataPlotViewBox.autoRange()
-            self.fftPlotViewBox.autoRange()
+            if self.data is None:
+                pass
+            else:
+                self.auto_range_all()
 
+        if event.key() == Qt.Key_Control:
+            self.dataPlotViewBox.setMouseMode(3)
+            self.fftPlotViewBox.setMouseMode(3)
+
+            if self.dataPlot.isUnderMouse() or self.fftPlot.isUnderMouse():
+                self.mouse_mode_label.setText("Pan  Mode")
+                self.setCursor(Qt.OpenHandCursor)
+
+
+    def keyReleaseEvent(self, event):
+        if event.key() == Qt.Key_Control:
+            self.dataPlotViewBox.setMouseMode(1)
+            self.fftPlotViewBox.setMouseMode(1)
+
+            self.mouse_mode_label.setText("Rect Select")
+            self.setCursor(Qt.ArrowCursor)
+
+
+    def mousePressEvent(self, event):
+        if QApplication.keyboardModifiers() == Qt.ControlModifier:
+            if self.dataPlot.isUnderMouse() or self.fftPlot.isUnderMouse():
+                self.setCursor(Qt.ClosedHandCursor)
+
+
+    def mouseReleaseEvent(self, event):
+        if QApplication.keyboardModifiers() == Qt.ControlModifier:
+            if self.dataPlot.isUnderMouse() or self.fftPlot.isUnderMouse():
+                self.setCursor(Qt.OpenHandCursor)
+        else:
+            self.setCursor(Qt.ArrowCursor)
+    
+
+    def auto_range_all(self):
+        self.dataPlotViewBox.autoRange()
+        self.fftPlotViewBox.autoRange()
 
     def load_csv(self, file_path):
         self.ui.labelBusy.setText('<h1>Reading CSV Data... (2/5)</h1>')
@@ -169,8 +218,8 @@ class Window(QMainWindow):
         self.fft_data[:, 0] = freq
         self.fft_data[:, 1] = amplitude
         self.fft_data[:, 1] /= self.win_mean        
-        self.max_amplitude = max(amplitude)
-        self.min_amplitude = min(amplitude)
+        self.max_amplitude = max(self.fft_data[:,1])
+        self.min_amplitude = min(self.fft_data[:,1])
         self.plot()
 
     def plot(self, file_path=None):
@@ -213,6 +262,8 @@ class Window(QMainWindow):
         self.ui.chartWidget.show()
         self.ui.fftwidget.show()
 
+        self.auto_range_all()
+
 
     def open_file(self, file=None):
         if file:
@@ -244,13 +295,16 @@ class Window(QMainWindow):
         try:
             chunks = pd.read_csv(file_path, chunksize=1000)
             data = pd.concat(chunks)
+            self.file_label.setText(file_path)
             return data.to_numpy()
         except TypeError as err:
             print(err)
-            self.ui.labelBusy.setText('<h1>File Read Error: Unable to parse CSV file.</h1>\n<h2>Please ensure the selected file is in the correct format.</h2>')    
+            self.ui.labelBusy.setText('<h1>File Read Error: Unable to parse CSV file.</h1>\n<h2>Please ensure the selected file is in the correct format.</h2>')
+            self.file_label.setText('File: Error')    
         except pd.errors.ParserError as err:
             print(err)
-            self.ui.labelBusy.setText('<h1>File Read Error: Unable to parse CSV file.</h1>\n<h2>Please ensure the selected file is in the correct format.</h2>')    
+            self.ui.labelBusy.setText('<h1>File Read Error: Unable to parse CSV file.</h1>\n<h2>Please ensure the selected file is in the correct format.</h2>')  
+            self.file_label.setText('File: Error')      
     
     
     def clear_chart(self):

@@ -362,7 +362,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "FreeFFT - FFT Analysis Software"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "FreeFFT"))
         self.groupBox_2.setTitle(_translate("MainWindow", "Data File"))
         self.label_12.setText(_translate("MainWindow", "sec"))
         self.labelFileName.setText(_translate("MainWindow", "Data File"))

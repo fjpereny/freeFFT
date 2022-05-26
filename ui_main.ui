@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>FreeFFT - FFT Analysis Software</string>
+   <string>FreeFFT</string>
   </property>
   <property name="windowIcon">
    <iconset resource="resources.qrc">
