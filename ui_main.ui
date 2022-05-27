@@ -69,7 +69,7 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>434</width>
+                <width>422</width>
                 <height>944</height>
                </rect>
               </property>
@@ -360,16 +360,6 @@
                     <string>Zero Padding</string>
                    </property>
                    <layout class="QGridLayout" name="gridLayout_6">
-                    <item row="0" column="0">
-                     <widget class="QCheckBox" name="checkBoxPadZeros">
-                      <property name="text">
-                       <string>Pad Zeros</string>
-                      </property>
-                      <property name="checked">
-                       <bool>true</bool>
-                      </property>
-                     </widget>
-                    </item>
                     <item row="2" column="4">
                      <widget class="QLabel" name="label_16">
                       <property name="text">
@@ -393,16 +383,6 @@
                       </property>
                      </widget>
                     </item>
-                    <item row="1" column="0">
-                     <widget class="QRadioButton" name="radioButtonNearestPower2">
-                      <property name="text">
-                       <string>Nearest Power of 2</string>
-                      </property>
-                      <property name="checked">
-                       <bool>true</bool>
-                      </property>
-                     </widget>
-                    </item>
                     <item row="2" column="0">
                      <widget class="QRadioButton" name="radioButtonMinPower2">
                       <property name="text">
@@ -417,6 +397,26 @@
                       </property>
                       <property name="value">
                        <number>10</number>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QRadioButton" name="radioButtonNearestPower2">
+                      <property name="text">
+                       <string>Nearest Power of 2</string>
+                      </property>
+                      <property name="checked">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="0">
+                     <widget class="QCheckBox" name="checkBoxPadZeros">
+                      <property name="text">
+                       <string>Pad Zeros</string>
+                      </property>
+                      <property name="checked">
+                       <bool>true</bool>
                       </property>
                      </widget>
                     </item>
@@ -438,92 +438,87 @@
                    <property name="title">
                     <string>Windowing Options</string>
                    </property>
-                   <layout class="QGridLayout" name="gridLayout_2">
-                    <item row="1" column="0">
-                     <widget class="QRadioButton" name="radioButtonUniform">
-                      <property name="text">
-                       <string>Uniform</string>
-                      </property>
-                      <property name="checked">
-                       <bool>true</bool>
-                      </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_4">
+                    <item>
+                     <widget class="QComboBox" name="comboBoxWindowOption">
+                      <item>
+                       <property name="text">
+                        <string>Uniform (None)</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>Bartlett</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>Blackman</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>Flat Top</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>Force</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>Kaiser-Bessel</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>Hamming</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>Hanning</string>
+                       </property>
+                      </item>
                      </widget>
                     </item>
-                    <item row="1" column="2">
-                     <widget class="QRadioButton" name="radioButton_8">
-                      <property name="text">
-                       <string>Flat Top</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="1" column="4">
-                     <widget class="QRadioButton" name="radioButton_7">
-                      <property name="text">
-                       <string>Exponential</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="2" column="3">
-                     <widget class="QRadioButton" name="radioButtonHanning">
-                      <property name="text">
-                       <string>Hanning</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="2" column="2">
-                     <widget class="QRadioButton" name="radioButtonHamming">
-                      <property name="text">
-                       <string>Hamming</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="7" column="0">
-                     <widget class="QRadioButton" name="radioButtonKaiser">
-                      <property name="text">
-                       <string>Kaiser-Bessel</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="2" column="0">
-                     <widget class="QRadioButton" name="radioButtonBlackman">
-                      <property name="text">
-                       <string>Blackman</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="7" column="1">
-                     <widget class="QLabel" name="label">
-                      <property name="text">
-                       <string>β</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="7" column="2">
-                     <widget class="QDoubleSpinBox" name="doubleSpinBoxKaiserBeta">
-                      <property name="value">
-                       <double>15.000000000000000</double>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="1" column="3">
-                     <widget class="QRadioButton" name="radioButton_5">
-                      <property name="text">
-                       <string>Force</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="1" column="5">
-                     <spacer name="horizontalSpacer">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>40</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
+                    <item>
+                     <layout class="QHBoxLayout" name="horizontalLayout_6">
+                      <item>
+                       <widget class="QLabel" name="label">
+                        <property name="text">
+                         <string>β</string>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QDoubleSpinBox" name="doubleSpinBoxKaiserBeta">
+                        <property name="enabled">
+                         <bool>false</bool>
+                        </property>
+                        <property name="value">
+                         <double>15.000000000000000</double>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <spacer name="horizontalSpacer">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>40</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                     </layout>
                     </item>
                    </layout>
                   </widget>
@@ -727,9 +722,6 @@
   <tabstop>lineEditPeak</tabstop>
   <tabstop>lineEditPkPk</tabstop>
   <tabstop>doubleSpinBoxEndTime</tabstop>
-  <tabstop>radioButtonUniform</tabstop>
-  <tabstop>radioButtonBlackman</tabstop>
-  <tabstop>radioButtonKaiser</tabstop>
  </tabstops>
  <resources>
   <include location="resources.qrc"/>

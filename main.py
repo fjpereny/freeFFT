@@ -59,6 +59,8 @@ class Window(QMainWindow):
         self.ui.toolButtonDataFile.clicked.connect(self.open_file)
         
         self.ui.spinBoxMinPower2.valueChanged.connect(self.power_2_preview)
+        
+        self.ui.comboBoxWindowOption.currentTextChanged.connect(self.window_option_changed)
 
         self.ui.checkBoxShowRawData.clicked.connect(self.replot_all)
         self.ui.checkBoxShowWindowedData.clicked.connect(self.replot_all)
@@ -112,6 +114,14 @@ class Window(QMainWindow):
             self.open_file(file)
 
 
+    def window_option_changed(self):
+        print('win option change')
+        if self.ui.comboBoxWindowOption.currentText() == 'Kaiser-Bessel':
+            self.ui.doubleSpinBoxKaiserBeta.setEnabled(True)
+        else:
+            self.ui.doubleSpinBoxKaiserBeta.setDisabled(True)
+
+
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_F5:
             self.recalculate()
@@ -140,19 +150,9 @@ class Window(QMainWindow):
             self.setCursor(Qt.ArrowCursor)
 
 
-    def mousePressEvent(self, event):
-        if QApplication.keyboardModifiers() == Qt.ControlModifier:
-            if self.dataPlot.isUnderMouse() or self.fftPlot.isUnderMouse():
-                self.setCursor(Qt.ClosedHandCursor)
+    def graphClickHandler(self, event):
+        pass
 
-
-    def mouseReleaseEvent(self, event):
-        if QApplication.keyboardModifiers() == Qt.ControlModifier:
-            if self.dataPlot.isUnderMouse() or self.fftPlot.isUnderMouse():
-                self.setCursor(Qt.OpenHandCursor)
-        else:
-            self.setCursor(Qt.ArrowCursor)
-    
 
     def auto_range_all(self):
         self.dataPlotViewBox.autoRange()
@@ -289,6 +289,8 @@ class Window(QMainWindow):
             self.open_file()
         else:
             self.load_csv(file_path)
+        
+        self.replot_all()
 
 
     def read_csv(self, file_path, min_time=None, max_time=None):
@@ -324,20 +326,31 @@ class Window(QMainWindow):
 
 
     def window_function(self):
-        if self.ui.radioButtonBlackman.isChecked():
+        selected_window = self.ui.comboBoxWindowOption.currentText()
+
+        if selected_window =='Bartlett':
+            self.win = np.bartlett(len(self.data))
+            self.windowed_data = self.data[:,1] * self.win
+            return     
+        
+        elif selected_window == 'Blackman':
             self.win = np.blackman(len(self.data))
             self.windowed_data = self.data[:,1] * self.win
             return
-        elif self.ui.radioButtonHanning.isChecked():
+        
+        elif selected_window == 'Hanning':
             self.win = np.hanning(len(self.data))
             self.windowed_data = self.data[:,1] * self.win
             return
-        elif self.ui.radioButtonHamming.isChecked():
+        
+        elif selected_window == 'Hamming':
             self.win = np.hamming(len(self.data))
             self.windowed_data = self.data[:,1] * self.win
-        elif self.ui.radioButtonKaiser.isChecked():
+        
+        elif selected_window == 'Kaiser-Bessel':
             self.win = np.kaiser(len(self.data), self.ui.doubleSpinBoxKaiserBeta.value())
             self.windowed_data = self.data[:,1] * self.win        
+        
         else:
             self.win = np.full(len(self.data), 1)
             self.windowed_data = self.data[:,1]        
