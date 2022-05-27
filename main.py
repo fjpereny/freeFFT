@@ -14,6 +14,8 @@ import pyqtgraph as pg
 import numpy as np
 from numpy import array, random
 
+from scipy import signal
+
 import pandas as pd
 
 import fast_fourier_transform
@@ -61,6 +63,8 @@ class Window(QMainWindow):
         self.ui.spinBoxMinPower2.valueChanged.connect(self.power_2_preview)
         
         self.ui.comboBoxWindowOption.currentTextChanged.connect(self.window_option_changed)
+        self.ui.comboBoxWindowOption.currentTextChanged.connect(self.recalculate)
+        self.ui.doubleSpinBoxKaiserBeta.valueChanged.connect(self.recalculate)
 
         self.ui.checkBoxShowRawData.clicked.connect(self.replot_all)
         self.ui.checkBoxShowWindowedData.clicked.connect(self.replot_all)
@@ -329,26 +333,26 @@ class Window(QMainWindow):
         selected_window = self.ui.comboBoxWindowOption.currentText()
 
         if selected_window =='Bartlett':
-            self.win = np.bartlett(len(self.data))
+            self.win = signal.windows.bartlett(len(self.data))
             self.windowed_data = self.data[:,1] * self.win
             return     
         
         elif selected_window == 'Blackman':
-            self.win = np.blackman(len(self.data))
+            self.win = signal.windows.blackman(len(self.data))
             self.windowed_data = self.data[:,1] * self.win
             return
         
         elif selected_window == 'Hanning':
-            self.win = np.hanning(len(self.data))
+            self.win = signal.windows.hanning(len(self.data))
             self.windowed_data = self.data[:,1] * self.win
             return
         
         elif selected_window == 'Hamming':
-            self.win = np.hamming(len(self.data))
+            self.win = signal.windows.hamming(len(self.data))
             self.windowed_data = self.data[:,1] * self.win
         
         elif selected_window == 'Kaiser-Bessel':
-            self.win = np.kaiser(len(self.data), self.ui.doubleSpinBoxKaiserBeta.value())
+            self.win = signal.windows.kaiser(len(self.data), self.ui.doubleSpinBoxKaiserBeta.value())
             self.windowed_data = self.data[:,1] * self.win        
         
         else:
