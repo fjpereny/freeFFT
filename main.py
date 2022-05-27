@@ -21,6 +21,8 @@ import pandas as pd
 import fast_fourier_transform
 from statusbar_Vline import Statusbar_VLine
 
+import themes
+
 # UI Imports
 from ui_main import Ui_MainWindow
 import ui_about_win
@@ -116,6 +118,9 @@ class Window(QMainWindow):
 
         if file:
             self.open_file(file)
+
+        theme_pallete = themes.ThemePalette()
+        self.setPalette(theme_pallete)
 
 
     def window_option_changed(self):
