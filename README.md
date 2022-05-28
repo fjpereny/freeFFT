@@ -34,6 +34,18 @@ Alternatively all packages can be installed using the [requirements.txt](https:/
  pip install -r requirements.txt
 ```
 
+## Installing & Running
+Simply pull the repository or download and extract all files into the directory of your preference.  The application is started by running main.py.  Optionally, main.py takes an argument to directly open a data file.
+
+Opening the application:
+```
+python main.py
+````
+Opening the application directly with data file:
+```
+python main.py data.csv
+```
+
 ## License
 This software is released uner [GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007](https://www.gnu.org/licenses/gpl-3.0.en.html).
 
