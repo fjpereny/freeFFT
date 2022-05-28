@@ -43,6 +43,7 @@ class Window(QMainWindow):
         self.filter_plot = None
         self.raw_plot = None
         self.fft_plot = None
+        self.sync_plot = None
 
         # Statusbar setup
         self.mouse_mode_label = QLabel("Rect Select")
@@ -73,7 +74,7 @@ class Window(QMainWindow):
         self.ui.pushButtonRecalculate.clicked.connect(self.recalculate)
         self.ui.toolButtonDataFile.clicked.connect(self.open_file)
         self.ui.pushButtonAddSignal.clicked.connect(self.add_sinusoid)
-        self.ui.pushButtonCalcConditionMonitoring.clicked.connect(self.calc_condition_monitoring)
+        # self.ui.pushButtonCalcConditionMonitoring.clicked.connect(self.calc_condition_monitoring)
         
         self.ui.spinBoxMinPower2.valueChanged.connect(self.power_2_preview)
         
@@ -85,11 +86,17 @@ class Window(QMainWindow):
         self.ui.radioButtonMinPower2.clicked.connect(self.check_auto_recalculate)
         self.ui.radioButtonNearestPower2.clicked.connect(self.check_auto_recalculate)
         self.ui.spinBoxMinPower2.valueChanged.connect(self.check_auto_recalculate)
+        self.ui.doubleSpinBoxMachineSpeed.valueChanged.connect(self.check_auto_recalculate)
+        self.ui.doubleSpinBoxMaxSpeedVariation.valueChanged.connect(self.check_auto_recalculate)
 
         self.ui.checkBoxShowRawData.clicked.connect(self.replot_all)
         self.ui.checkBoxShowWindowedData.clicked.connect(self.replot_all)
         self.ui.checkBoxShowWindowFunction.clicked.connect(self.replot_all)
         self.ui.checkBoxShowZeroPadding.clicked.connect(self.replot_all)
+        self.ui.checkBoxSynchSearch.clicked.connect(self.check_auto_recalculate)
+
+        self.ui.radioButtonMachineSpeedHz.clicked.connect(self.check_auto_recalculate)
+        self.ui.radioButtonMachineSpeedRPM.clicked.connect(self.check_auto_recalculate)
 
         # Create the plots
         self.graphicsLayout = GraphicsLayoutWidget()
@@ -171,10 +178,6 @@ class Window(QMainWindow):
 
             self.mouse_mode_label.setText("Rect Mode")
             self.setCursor(Qt.ArrowCursor)
-
-
-    def graphClickHandler(self, event):
-        pass
 
 
     def auto_range_all(self):
@@ -285,6 +288,9 @@ class Window(QMainWindow):
         self.ui.chartWidget.show()
         self.ui.fftwidget.show()
 
+        if self.ui.checkBoxSynchSearch.isChecked():
+            self.synchronous_search_and_plot()
+            
         self.auto_range_all()
 
 
@@ -492,19 +498,25 @@ class Window(QMainWindow):
         self.check_auto_recalculate()
 
 
-    def calc_condition_monitoring(self):
+    def synchronous_search_and_plot(self):
         synch_speed = self.ui.doubleSpinBoxMachineSpeed.value()
         if self.ui.radioButtonMachineSpeedRPM.isChecked():
             synch_speed /= 60
 
         synch_harmonics = self.find_harmonics(synch_speed)
+
+        found_harmonics_freq = []
+        found_harmonic_amp = []
+
         for harmonic in synch_harmonics:
             nearest, index = self.find_nearest(self.fft_data[:,0], harmonic)
-            if self.fft_data[index,1] >= 0.3 and np.abs(harmonic - nearest) / harmonic <= (self.ui.doubleSpinBoxMaxSpeedVariation.value()):
-                pen = pg.mkPen(color=(255, 0, 0), width=4)
-                print(nearest, self.fft_data[index,1])
-                fft_plot_synch = BarGraphItem(x=[nearest], height=[self.fft_data[index,1]], width=0, pen=pen)
-                self.fftPlotViewBox.addItem(fft_plot_synch)
+            if np.abs(harmonic - nearest) / harmonic <= (self.ui.doubleSpinBoxMaxSpeedVariation.value()):
+                found_harmonics_freq.append(nearest)
+                found_harmonic_amp.append(self.fft_data[index,1])
+        
+        pen = pg.mkPen(color=(255, 0, 0), width=4)
+        self.sync_plot = BarGraphItem(x=found_harmonics_freq, height=found_harmonic_amp, width=0, pen=pen)
+        self.fftPlot.addItem(self.sync_plot)
 
     def find_harmonics(self, synch_freq):
         i = 1
