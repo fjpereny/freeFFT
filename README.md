@@ -25,10 +25,14 @@ FreeFFT requires Python 3 and the following packages:
 
 ### Installing Required Packages
 Each package can be installed invididually with the following terminal command:
-'''pip install <package name>'''
+```
+pip install <package name>
+```
 
-Alternatively all packages can be installed using the requirements.txt file with the following terminal command:
-'''pip install -r requirements.txt'''
+Alternatively all packages can be installed using the [requirements.txt](https://github.com/fjpereny/freeFFT/blob/main/requirements.txt) file with the following terminal command:
+```
+ pip install -r requirements.txt
+```
 
 ## License
 This software is released uner [GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007](https://www.gnu.org/licenses/gpl-3.0.en.html).
