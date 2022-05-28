@@ -34,6 +34,9 @@ class Window(QMainWindow):
         self.ui.setupUi(self)
 
         self.about_win = None
+
+        self.auto_calculate_enabled = True
+        self.auto_resize_plot = True
     
         self.data = None
         self.data_plot = None
@@ -41,12 +44,18 @@ class Window(QMainWindow):
         self.raw_plot = None
         self.fft_plot = None
 
+        # Statusbar setup
         self.mouse_mode_label = QLabel("Rect Select")
+        self.auto_calculate_label = QLabel("Auto Calculate On")
+        self.auto_resize_plot_label = QLabel("Auto Resize  On")
         self.file_label = QLabel("File: N/A")
-        self.ui.statusbar.setMinimumHeight(30)
-        self.ui.statusbar.showMessage("Welcome to FreeFFT!")
+
         self.ui.statusbar.addPermanentWidget(Statusbar_VLine())
         self.ui.statusbar.addPermanentWidget(self.mouse_mode_label)
+        self.ui.statusbar.addPermanentWidget(Statusbar_VLine())
+        self.ui.statusbar.addPermanentWidget(self.auto_calculate_label)
+        self.ui.statusbar.addPermanentWidget(Statusbar_VLine())
+        self.ui.statusbar.addPermanentWidget(self.auto_resize_plot_label)
         self.ui.statusbar.addPermanentWidget(Statusbar_VLine())
         self.ui.statusbar.addPermanentWidget(self.file_label)
         self.ui.statusbar.addPermanentWidget(Statusbar_VLine())
@@ -57,24 +66,29 @@ class Window(QMainWindow):
         self.ui.actionClose.triggered.connect(self.clear_chart)
         self.ui.actionRefresh_Data.triggered.connect(self.recalculate)
         self.ui.actionAbout_FreeFFT.triggered.connect(self.about)
+        self.ui.actionAuto_Recalculate.triggered.connect(self.auto_recalculate_changed)
+        self.ui.actionAuto_Resize_Plot.triggered.connect(self.auto_resize_plot_changed)
 
         self.ui.pushButtonReload.clicked.connect(self.reload_data)
         self.ui.pushButtonRecalculate.clicked.connect(self.recalculate)
         self.ui.toolButtonDataFile.clicked.connect(self.open_file)
+        self.ui.pushButtonAddSignal.clicked.connect(self.add_sinusoid)
         
         self.ui.spinBoxMinPower2.valueChanged.connect(self.power_2_preview)
         
         self.ui.comboBoxWindowOption.currentTextChanged.connect(self.window_option_changed)
-        self.ui.comboBoxWindowOption.currentTextChanged.connect(self.recalculate)
-        self.ui.doubleSpinBoxKaiserBeta.valueChanged.connect(self.recalculate)
+        self.ui.comboBoxWindowOption.currentTextChanged.connect(self.check_auto_recalculate)
+        self.ui.doubleSpinBoxKaiserBeta.valueChanged.connect(self.check_auto_recalculate)
+
+        self.ui.checkBoxPadZeros.clicked.connect(self.check_auto_recalculate)
+        self.ui.radioButtonMinPower2.clicked.connect(self.check_auto_recalculate)
+        self.ui.radioButtonNearestPower2.clicked.connect(self.check_auto_recalculate)
+        self.ui.spinBoxMinPower2.valueChanged.connect(self.check_auto_recalculate)
 
         self.ui.checkBoxShowRawData.clicked.connect(self.replot_all)
         self.ui.checkBoxShowWindowedData.clicked.connect(self.replot_all)
         self.ui.checkBoxShowWindowFunction.clicked.connect(self.replot_all)
         self.ui.checkBoxShowZeroPadding.clicked.connect(self.replot_all)
-
-        # pg.setConfigOption('background', 'w')
-        # pg.setConfigOption('foreground', 'k')
 
         # Create the plots
         self.graphicsLayout = GraphicsLayoutWidget()
@@ -124,7 +138,6 @@ class Window(QMainWindow):
 
 
     def window_option_changed(self):
-        print('win option change')
         if self.ui.comboBoxWindowOption.currentText() == 'Kaiser-Bessel':
             self.ui.doubleSpinBoxKaiserBeta.setEnabled(True)
         else:
@@ -347,8 +360,8 @@ class Window(QMainWindow):
             self.windowed_data = self.data[:,1] * self.win
             return
         
-        elif selected_window == 'Hanning':
-            self.win = signal.windows.hanning(len(self.data))
+        elif selected_window == 'Hann':
+            self.win = signal.windows.hann(len(self.data))
             self.windowed_data = self.data[:,1] * self.win
             return
         
@@ -364,6 +377,37 @@ class Window(QMainWindow):
             self.win = np.full(len(self.data), 1)
             self.windowed_data = self.data[:,1]        
         self.win_mean = sum(self.win) / self.sample_size
+
+
+    def auto_resize_plot_changed(self):
+        if self.ui.actionAuto_Resize_Plot.isChecked():
+            self.auto_resize_plot = True
+            self.auto_resize_plot_label.setText("Auto Resize  On")
+            self.dataPlotViewBox.enableAutoRange()
+            self.fftPlotViewBox.enableAutoRange()
+            self.auto_range_all()
+        else:
+            self.auto_resize_plot = False
+            self.auto_resize_plot_label.setText("Auto Resize Off")
+            self.dataPlotViewBox.disableAutoRange()
+            self.fftPlotViewBox.disableAutoRange()
+
+
+    def auto_recalculate_changed(self):
+        if self.ui.actionAuto_Recalculate.isChecked():
+            self.auto_calculate_enabled = True
+            self.auto_calculate_label.setText("Auto Calculate On")
+            self.recalculate()
+        else:
+            self.auto_calculate_enabled = False
+            self.auto_calculate_label.setText("Auto Calculate Off")
+
+
+    def check_auto_recalculate(self):
+        if self.auto_calculate_enabled:
+            self.recalculate()
+        else:
+            return
 
 
     def recalculate(self):
@@ -432,6 +476,19 @@ class Window(QMainWindow):
         if self.data is None:
             return
         self.plot()
+
+
+    def add_sinusoid(self):
+        A = self.ui.doubleSpinBoxAmplitude.value()
+        f = self.ui.doubleSpinBoxFrequency.value()
+        w = 2 * np.pi * f
+        phi = self.ui.doubleSpinBoxPhase.value()
+
+        time = self.data[:,0]
+        x = A * np.sin(self.data[:,0] * w + phi)
+
+        self.data[:,1] = self.data[:,1] + x
+        self.check_auto_recalculate()
 
 
 if __name__ == '__main__':

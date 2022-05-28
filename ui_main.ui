@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1099</width>
+    <width>1269</width>
     <height>1131</height>
    </rect>
   </property>
@@ -69,16 +69,13 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>422</width>
-                <height>944</height>
+                <width>438</width>
+                <height>965</height>
                </rect>
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout_3">
                <item>
                 <layout class="QVBoxLayout" name="verticalLayout">
-                 <item>
-                  <layout class="QHBoxLayout" name="horizontalLayout_5"/>
-                 </item>
                  <item>
                   <widget class="QGroupBox" name="groupBox_2">
                    <property name="title">
@@ -478,7 +475,7 @@
                       </item>
                       <item>
                        <property name="text">
-                        <string>Hanning</string>
+                        <string>Hann</string>
                        </property>
                       </item>
                      </widget>
@@ -542,6 +539,139 @@
           <attribute name="title">
            <string>Signal Generator</string>
           </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_6">
+           <item>
+            <layout class="QGridLayout" name="gridLayout_2">
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_8">
+               <property name="text">
+                <string>Frequency</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="2">
+              <widget class="QLabel" name="label_14">
+               <property name="text">
+                <string>End Time</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QDoubleSpinBox" name="doubleSpinBoxPhase">
+               <property name="maximum">
+                <double>100.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QRadioButton" name="radioButton">
+               <property name="text">
+                <string>Sinusoidal</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="label_13">
+               <property name="text">
+                <string>Start Time</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_5">
+               <property name="text">
+                <string>Amplitude</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="3">
+              <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
+               <property name="maximum">
+                <double>10000.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QDoubleSpinBox" name="doubleSpinBoxAmplitude">
+               <property name="maximum">
+                <double>1000.000000000000000</double>
+               </property>
+               <property name="value">
+                <double>1.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_9">
+               <property name="text">
+                <string>Phase</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QDoubleSpinBox" name="doubleSpinBoxFrequency">
+               <property name="maximum">
+                <double>100000.000000000000000</double>
+               </property>
+               <property name="value">
+                <double>100.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QDoubleSpinBox" name="doubleSpinBox">
+               <property name="maximum">
+                <double>10000.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="4">
+              <widget class="QLabel" name="label_19">
+               <property name="text">
+                <string>sec</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="2">
+              <widget class="QLabel" name="label_20">
+               <property name="text">
+                <string>Hz</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="2">
+              <widget class="QLabel" name="label_21">
+               <property name="text">
+                <string>rad</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButtonAddSignal">
+             <property name="text">
+              <string>Add Signal</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
          </widget>
          <widget class="QWidget" name="tabConditionMonitoring">
           <attribute name="title">
@@ -602,7 +732,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1099</width>
+     <width>1269</width>
      <height>30</height>
     </rect>
    </property>
@@ -636,6 +766,8 @@
     <property name="title">
      <string>&amp;Settings</string>
     </property>
+    <addaction name="actionAuto_Recalculate"/>
+    <addaction name="actionAuto_Resize_Plot"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -709,6 +841,28 @@
   <action name="actionAbout_FreeFFT">
    <property name="text">
     <string>&amp;About FreeFFT</string>
+   </property>
+  </action>
+  <action name="actionAuto_Recalculate">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Auto Calculate</string>
+   </property>
+  </action>
+  <action name="actionAuto_Resize_Plot">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Auto Resize Plot</string>
    </property>
   </action>
  </widget>
