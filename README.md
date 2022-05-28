@@ -1,6 +1,8 @@
 # FreeFFT
 FreeFFT is a [free](https://www.gnu.org/philosophy/free-sw.html) and open source vibration analsys software package.  Visit [www.frankpereny.com/freefft/](https://www.frankpereny.com/freefft) for more information.
 
+<img src="https://github.com/fjpereny/freeFFT/blob/main/img/FreeFFT%20GUI%201.png" alt="FreeFFT GUI">
+
 ## Features
 - Simple & Intuitive Interface
 - Two Column CSV Data Import Compatibility
