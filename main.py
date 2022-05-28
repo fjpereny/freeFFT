@@ -73,6 +73,7 @@ class Window(QMainWindow):
         self.ui.pushButtonRecalculate.clicked.connect(self.recalculate)
         self.ui.toolButtonDataFile.clicked.connect(self.open_file)
         self.ui.pushButtonAddSignal.clicked.connect(self.add_sinusoid)
+        self.ui.pushButtonCalcConditionMonitoring.clicked.connect(self.calc_condition_monitoring)
         
         self.ui.spinBoxMinPower2.valueChanged.connect(self.power_2_preview)
         
@@ -422,48 +423,48 @@ class Window(QMainWindow):
         self.about_win.show()
         
 
-    def plot_freq_resolution(self, fft_data):
-        step_size = self.ui.doubleSpinBoxPlotFreqResolution.value()
-        if step_size <= 0:
-            step_size = 1
-            self.ui.doubleSpinBoxPlotFreqResolution.setValue(1.0)
+    # def plot_freq_resolution(self, fft_data):
+    #     step_size = self.ui.doubleSpinBoxPlotFreqResolution.value()
+    #     if step_size <= 0:
+    #         step_size = 1
+    #         self.ui.doubleSpinBoxPlotFreqResolution.setValue(1.0)
         
-        cur_bin_index = 0
-        new_bins = [0]
-        new_amps = [0]        
-        for point in self.fft_data:
-            if point[0] <= (cur_bin_index + 1) * step_size:
-                new_amps[len(new_amps) - 1] += point[1]
-            else:
-                cur_bin_index += 1
-                while point[0] > (cur_bin_index + 1) * step_size:
-                    cur_bin_index += 1
-                    new_amps.append(0)
-                    new_bins.append((cur_bin_index + 1) * step_size)
-                new_amps.append(point[1])
-                new_bins.append((cur_bin_index + 1) * step_size)
-        return new_bins, new_amps
+    #     cur_bin_index = 0
+    #     new_bins = [0]
+    #     new_amps = [0]        
+    #     for point in self.fft_data:
+    #         if point[0] <= (cur_bin_index + 1) * step_size:
+    #             new_amps[len(new_amps) - 1] += point[1]
+    #         else:
+    #             cur_bin_index += 1
+    #             while point[0] > (cur_bin_index + 1) * step_size:
+    #                 cur_bin_index += 1
+    #                 new_amps.append(0)
+    #                 new_bins.append((cur_bin_index + 1) * step_size)
+    #             new_amps.append(point[1])
+    #             new_bins.append((cur_bin_index + 1) * step_size)
+    #     return new_bins, new_amps
 
-    def checkBoxHideLowMagData_clicked(self):
-        if self.ui.checkBoxHideLowMagData.isChecked():
-            self.ui.radioButtonChartContinuous.setChecked(False)
-            self.ui.radioButtonHistogram.setChecked(True)
-            self.ui.radioButtonChartContinuous.setEnabled(False)
-            self.ui.radioButtonHistogram.setEnabled(False)
-        else:
-            self.ui.radioButtonChartContinuous.setEnabled(True)
-            self.ui.radioButtonHistogram.setEnabled(True)
+    # def checkBoxHideLowMagData_clicked(self):
+    #     if self.ui.checkBoxHideLowMagData.isChecked():
+    #         self.ui.radioButtonChartContinuous.setChecked(False)
+    #         self.ui.radioButtonHistogram.setChecked(True)
+    #         self.ui.radioButtonChartContinuous.setEnabled(False)
+    #         self.ui.radioButtonHistogram.setEnabled(False)
+    #     else:
+    #         self.ui.radioButtonChartContinuous.setEnabled(True)
+    #         self.ui.radioButtonHistogram.setEnabled(True)
 
-        # create an axis
-        self.axWaterfall.plot(self.plot_fft_data[:, 0] * self.increment, np.ones(len(self.plot_fft_data)) * max(self.plot_data[:,0]) * self.increment, self.plot_fft_data[:, 1] * self.increment)
-        self.axWaterfall.set_title('FFT Waterfall Plot')
-        self.axWaterfall.set_xlabel('Frequency (Hz)')
-        self.axWaterfall.set_ylabel('Time (sec)')
-        self.axWaterfall.set_zlabel('Amplitude')
-        self.axWaterfall.grid()
+    #     # create an axis
+    #     self.axWaterfall.plot(self.plot_fft_data[:, 0] * self.increment, np.ones(len(self.plot_fft_data)) * max(self.plot_data[:,0]) * self.increment, self.plot_fft_data[:, 1] * self.increment)
+    #     self.axWaterfall.set_title('FFT Waterfall Plot')
+    #     self.axWaterfall.set_xlabel('Frequency (Hz)')
+    #     self.axWaterfall.set_ylabel('Time (sec)')
+    #     self.axWaterfall.set_zlabel('Amplitude')
+    #     self.axWaterfall.grid()
         
-        self.canvas.draw()
-        self.repaint()
+    #     self.canvas.draw()
+    #     self.repaint()
 
 
     def power_2_preview(self):
@@ -490,6 +491,36 @@ class Window(QMainWindow):
         self.data[:,1] = self.data[:,1] + x
         self.check_auto_recalculate()
 
+
+    def calc_condition_monitoring(self):
+        synch_speed = self.ui.doubleSpinBoxMachineSpeed.value()
+        if self.ui.radioButtonMachineSpeedRPM.isChecked():
+            synch_speed /= 60
+
+        synch_harmonics = self.find_harmonics(synch_speed)
+        for harmonic in synch_harmonics:
+            nearest, index = self.find_nearest(self.fft_data[:,0], harmonic)
+            if self.fft_data[index,1] >= 0.3 and np.abs(harmonic - nearest) / harmonic <= (self.ui.doubleSpinBoxMaxSpeedVariation.value()):
+                pen = pg.mkPen(color=(255, 0, 0), width=4)
+                print(nearest, self.fft_data[index,1])
+                fft_plot_synch = BarGraphItem(x=[nearest], height=[self.fft_data[index,1]], width=0, pen=pen)
+                self.fftPlotViewBox.addItem(fft_plot_synch)
+
+    def find_harmonics(self, synch_freq):
+        i = 1
+        synch_freqs = []
+        while (i * synch_freq) <= self.nyquist_freq:
+            synch_freqs.append(i * synch_freq)
+            i += 1
+        synch_freqs_array = np.array(synch_freqs)
+        return synch_freqs_array
+
+
+    def find_nearest(self, array, value):
+        deltas = array - value
+        deltas = np.abs(deltas)
+        index = np.argmin(deltas)
+        return array[index], index
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
