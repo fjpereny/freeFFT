@@ -268,10 +268,12 @@ class Window(QMainWindow):
 
         if self.ui.checkBoxShowRawData.isChecked():
             self.raw_plot = self.dataPlot.plot(self.data[:,0], self.data[:,1], pen=dataPen)
+            
         
         if self.ui.checkBoxShowWindowedData.isChecked():
             if self.ui.checkBoxShowZeroPadding.isChecked():
                 self.data_plot = self.dataPlot.plot(self.plot_data[:,0], self.plot_data[:,1], pen=windowDataPen)
+                
             else:
                 plot_data_no_zeros = np.resize(self.plot_data, (len(self.data), 2))
                 self.data_plot = self.dataPlot.plot(plot_data_no_zeros[:,0], plot_data_no_zeros[:,1], pen=windowDataPen)
@@ -290,8 +292,6 @@ class Window(QMainWindow):
 
         if self.ui.checkBoxSynchSearch.isChecked():
             self.synchronous_search_and_plot()
-            
-        self.auto_range_all()
 
 
     def open_file(self, file=None):
@@ -427,50 +427,6 @@ class Window(QMainWindow):
     def about(self):
         self.about_win = ui_about_win.Window()
         self.about_win.show()
-        
-
-    # def plot_freq_resolution(self, fft_data):
-    #     step_size = self.ui.doubleSpinBoxPlotFreqResolution.value()
-    #     if step_size <= 0:
-    #         step_size = 1
-    #         self.ui.doubleSpinBoxPlotFreqResolution.setValue(1.0)
-        
-    #     cur_bin_index = 0
-    #     new_bins = [0]
-    #     new_amps = [0]        
-    #     for point in self.fft_data:
-    #         if point[0] <= (cur_bin_index + 1) * step_size:
-    #             new_amps[len(new_amps) - 1] += point[1]
-    #         else:
-    #             cur_bin_index += 1
-    #             while point[0] > (cur_bin_index + 1) * step_size:
-    #                 cur_bin_index += 1
-    #                 new_amps.append(0)
-    #                 new_bins.append((cur_bin_index + 1) * step_size)
-    #             new_amps.append(point[1])
-    #             new_bins.append((cur_bin_index + 1) * step_size)
-    #     return new_bins, new_amps
-
-    # def checkBoxHideLowMagData_clicked(self):
-    #     if self.ui.checkBoxHideLowMagData.isChecked():
-    #         self.ui.radioButtonChartContinuous.setChecked(False)
-    #         self.ui.radioButtonHistogram.setChecked(True)
-    #         self.ui.radioButtonChartContinuous.setEnabled(False)
-    #         self.ui.radioButtonHistogram.setEnabled(False)
-    #     else:
-    #         self.ui.radioButtonChartContinuous.setEnabled(True)
-    #         self.ui.radioButtonHistogram.setEnabled(True)
-
-    #     # create an axis
-    #     self.axWaterfall.plot(self.plot_fft_data[:, 0] * self.increment, np.ones(len(self.plot_fft_data)) * max(self.plot_data[:,0]) * self.increment, self.plot_fft_data[:, 1] * self.increment)
-    #     self.axWaterfall.set_title('FFT Waterfall Plot')
-    #     self.axWaterfall.set_xlabel('Frequency (Hz)')
-    #     self.axWaterfall.set_ylabel('Time (sec)')
-    #     self.axWaterfall.set_zlabel('Amplitude')
-    #     self.axWaterfall.grid()
-        
-    #     self.canvas.draw()
-    #     self.repaint()
 
 
     def power_2_preview(self):
@@ -510,14 +466,16 @@ class Window(QMainWindow):
 
         for harmonic in synch_harmonics:
             nearest, index = self.find_nearest(self.fft_data[:,0], harmonic)
-            if np.abs(harmonic - nearest) / harmonic <= (self.ui.doubleSpinBoxMaxSpeedVariation.value()):
-                found_harmonics_freq.append(nearest)
-                found_harmonic_amp.append(self.fft_data[index,1])
+            nearest_max_index = self.find_nearest_max_harmonic(index, harmonic)
+            found_harmonics_freq.append(self.fft_data[nearest_max_index,0])
+            found_harmonic_amp.append(self.fft_data[nearest_max_index, 1])
         
-        pen = pg.mkPen(color=(255, 0, 0), width=4)
+        pen = pg.mkPen(color=(255, 0, 0), width=2)
         self.sync_plot = BarGraphItem(x=found_harmonics_freq, height=found_harmonic_amp, width=0, pen=pen)
         self.fftPlot.addItem(self.sync_plot)
 
+
+    # Finds all possible harmonics based on nominal 1x synchronous
     def find_harmonics(self, synch_freq):
         i = 1
         synch_freqs = []
@@ -528,11 +486,49 @@ class Window(QMainWindow):
         return synch_freqs_array
 
 
+    # Finds the frequency closest to the nominal frequency harmonic
     def find_nearest(self, array, value):
         deltas = array - value
         deltas = np.abs(deltas)
         index = np.argmin(deltas)
         return array[index], index
+
+    # Finds the maximum amplitude frequency within the bad of allowable slip frequencies
+    def find_nearest_max_harmonic(self, index, harmonic):
+        cur_max_amplitude = self.fft_data[index,1]
+        cur_max_index = index
+        max_freq = harmonic * (1 + self.ui.doubleSpinBoxMaxSpeedVariation.value()/100.0)
+        min_freq = harmonic * (1 - self.ui.doubleSpinBoxMaxSpeedVariation.value()/100.0)
+
+        # Searches left for local maximum amplitudes near nominal
+        search_index = index
+        while (search_index > 0):
+            search_freq = self.fft_data[search_index,0]
+            if search_freq < min_freq:
+                break
+            search_amplitude = self.fft_data[search_index,1]
+            if search_amplitude > cur_max_amplitude:
+                cur_max_amplitude = search_amplitude
+                cur_max_index = search_index
+                # print(cur_max_amplitude)
+            search_index -= 1
+            
+        # Searches right for local maximum amplitudes near nominal
+        search_index = index
+        while (search_index < len(self.fft_data)):
+            search_freq = self.fft_data[search_index,0]
+            if search_freq > max_freq:
+                break
+            search_amplitude = self.fft_data[search_index,1]
+            if search_amplitude > cur_max_amplitude:
+                cur_max_amplitude = search_amplitude
+                cur_max_index = search_index
+                # print(cur_max_amplitude)
+            search_index += 1
+
+        return cur_max_index
+        
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
