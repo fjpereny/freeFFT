@@ -470,7 +470,7 @@ class Window(QMainWindow):
             found_harmonics_freq.append(self.fft_data[nearest_max_index,0])
             found_harmonic_amp.append(self.fft_data[nearest_max_index, 1])
         
-        pen = pg.mkPen(color=(255, 0, 0), width=2)
+        pen = pg.mkPen(color=(255, 0, 0), width=4)
         self.sync_plot = BarGraphItem(x=found_harmonics_freq, height=found_harmonic_amp, width=0, pen=pen)
         self.fftPlot.addItem(self.sync_plot)
 
