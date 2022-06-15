@@ -526,8 +526,7 @@ class Window(QMainWindow):
         return cur_max_index
         
 
-
-if __name__ == '__main__':
+def main():
     app = QApplication(sys.argv)
 
     # Allows opening file directly from terminal
@@ -540,3 +539,7 @@ if __name__ == '__main__':
     main.show()
 
     sys.exit(app.exec_())
+
+
+if __name__ == '__main__':
+    main()
