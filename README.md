@@ -25,15 +25,10 @@ FreeFFT requires Python 3 and the following packages:
  - scipy
  - pandas
 
-### Installing Required Packages
-Each package can be installed invididually with the following terminal command:
+### Installing
+Free FFT can be installed via PIP with the following terminal command:
 ```
-pip install <package name>
-```
-
-Alternatively all packages can be installed using the [requirements.txt](https://github.com/fjpereny/freeFFT/blob/main/requirements.txt) file with the following terminal command:
-```
- pip install -r requirements.txt
+pip install freefft
 ```
 
 ## Installing & Running
@@ -41,11 +36,11 @@ Simply pull the repository or download and extract all files into the directory 
 
 Opening the application:
 ```
-python main.py
+python -m freefft
 ````
 Opening the application directly with data file:
 ```
-python main.py data.csv
+python -m freefft data.csv
 ```
 
 ## License
