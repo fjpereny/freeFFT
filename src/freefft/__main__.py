@@ -18,14 +18,11 @@ from scipy import signal
 
 import pandas as pd
 
-import fast_fourier_transform
-from statusbar_Vline import Statusbar_VLine
-
-import themes
-
-# UI Imports
-from ui_main import Ui_MainWindow
-import ui_about_win
+from freefft import fast_fourier_transform
+from freefft.statusbar_Vline import Statusbar_VLine
+from freefft import themes
+from freefft.ui_main import Ui_MainWindow
+from freefft import ui_about_win
 
 class Window(QMainWindow):
     def __init__(self, file=None):

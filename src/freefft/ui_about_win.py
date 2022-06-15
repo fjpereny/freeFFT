@@ -1,8 +1,9 @@
 import sys
+
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtWidgets import QMainWindow, QApplication
 
-from ui_about import Ui_AboutWindow
+from freefft.ui_about import Ui_AboutWindow
 
 
 class Window(QMainWindow):
