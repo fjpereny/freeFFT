@@ -138,8 +138,8 @@ class Window(QMainWindow):
         if file:
             self.open_file(file)
 
-        theme_pallete = themes.ThemePalette()
-        self.setPalette(theme_pallete)
+        theme_palette = themes.ThemePalette()
+        self.setPalette(theme_palette)
 
 
     def window_option_changed(self):

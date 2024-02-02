@@ -44,7 +44,7 @@ python -m freefft data.csv
 ```
 
 ## License
-This software is released uner [GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007](https://www.gnu.org/licenses/gpl-3.0.en.html).
+This software is released under [GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007](https://www.gnu.org/licenses/gpl-3.0.en.html).
 
 Copyright © 2022 [Frank Pereny](https://github.com/fjpereny/)
 

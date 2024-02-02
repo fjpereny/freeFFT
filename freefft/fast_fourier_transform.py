@@ -5,7 +5,7 @@ from numpy.fft import fft
 
 def make_fft(time_vals, amplitude_vals, sampling_rate, N=None, n=None):
     if len(amplitude_vals) != len(time_vals):
-        print("Error: Amplitude and time valudes must have the same length.")
+        print("Error: Amplitude and time values must have the same length.")
         return None
     
     X = fft(amplitude_vals, n=n)
@@ -29,9 +29,9 @@ def make_fft(time_vals, amplitude_vals, sampling_rate, N=None, n=None):
     return [freq, amplitudes]
 
 
-def find_nearest_power_2(num_of_ponts):
+def find_nearest_power_2(num_of_points):
     x = 0
-    while 2**x < num_of_ponts:
+    while 2**x < num_of_points:
         x += 1
     return x
 
